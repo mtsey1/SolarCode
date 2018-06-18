@@ -1,4 +1,5 @@
 function [s] = find_solar_by_pc (s, meta)
+    
   fprintf('Calculating solar corrections\n');
   solar_by_pc(length(meta.pclist),meta.Days,s.dark_start-s.dark_end+1)=0;
   new_solar_by_pc = solar_by_pc;

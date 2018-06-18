@@ -76,7 +76,7 @@ DoCnI = 0;
 full_years_only = true;
 
 % Set to a non-zero value to process only  MaxUsers customers
-MaxUsers = 500;
+MaxUsers = 1000;
 %MaxUsers = 300;
 %MaxUsers = 1000;
 %MaxUsers = 88000;
