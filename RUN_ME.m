@@ -56,7 +56,7 @@ elseif 1>0
   meta.timestamp_uses_daylightsaving = true;
   meta.dataset_name = 'Melbourne';
 else
-  bulkDataPath = '/media/lachlana/NTFS/UE_data/';
+  bulkDataPath = 'C:/Users/seymo/Desktop/UnitedEnergy/';
   metaDataPath = bulkDataPath;
   Year = 2014;
   meta.SamPerDay = 48;
