@@ -43,7 +43,10 @@ if 0>0
   location.altitude = 60;
 elseif 1>0
   if exist ('C:', 'dir')
-    bulkDataPath = 'C:/Users/seymo/Desktop/UnitedEnergy/';
+    bulkDataPath = 'G:/My Drive/rsrch/power/UnitedEnergy/';
+    if ~exist (bulkDataPath, 'dir')
+      bulkDataPath = 'C:/Users/seymo/Desktop/UnitedEnergy/';
+    end
   else
     bulkDataPath = '~/UnitedEnergy/';
   end
