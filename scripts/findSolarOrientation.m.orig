@@ -1,0 +1,225 @@
+function [capacity, az, ze, dy, mismatch] = findSolarOrientation (seen, sunPos, SamPerDay, solar_start, solar_end, ~, data, s, smr, rr, ignore) % missing argument was 'pass'
+    [mx, mx_pos] = max(squeeze (seen(1,:,:)), [], 2);
+    if min (mx_pos) < solar_start || max (mx_pos) > solar_end
+      capacity = 0;
+      az = 0;
+      ze = 0;
+      dy = 0;
+      mismatch = 1000;
+      return;
+    end
+    % Only consider data points at least 25% of peak
+    % to exclude both times of high demand and ambient light near dawn/dusk
+    solar_range = solar_start-1+(1:size(sunPos,2));
+    big = bsxfun(@gt, squeeze (seen(1,:,solar_range)), mx/4);
+    % If there was a mismatch of azimuths,
+    % only match to peak of less reliable one.
+    if ~isempty (ignore)
+      big(ignore, :) = false;
+      big(ignore, mx_pos(ignore) - solar_start + 1) = true;
+    end
+    bigm = [false(size(big,1),solar_start-1), big];
+
+    if length(data) > 1
+        cap = max(mx);
+        az = ((mean(mx_pos) * -360/SamPerDay) + 180);
+        az = az * abs(az/10);
+        az = max (-90, min (90, az));
+        ze = 10;		% ~ sun's summer zenith angle in Melbourne
+    else                % initialise from previous run
+        cap = data;
+        az = smr;
+        ze = rr;
+    end
+
+    options = optimoptions('fmincon', 'Display', 'off', 'Algorithm','active-set');
+    % DEBUG CODE
+    sseen = zeros (365, (s.dark_start - s.dark_end)+1);
+    capFactor = sseen;
+    for i = 1:365
+      for j = 0:(s.dark_start-s.dark_end)
+        % Estimate generation at this time, assuming no cloud
+        p1 = cosd(ze);
+        p2 = sind(ze).*cosd(s.pp(i,j+1) - az);
+        capFactor(i,j+1) ...
+          = max (0,   bsxfun (@times, s.s1(i,j+1), p1) ...
+          + bsxfun (@times, s.s2(i,j+1), p2))';
+      end
+    end
+    dat = squeeze (evalin ('caller', 'data(i,:,s.dark_end:s.dark_start)'));
+    figure(1); imagesc ((dat + capFactor * cap/2)');
+    figure(2); plot ((dat + capFactor * cap/2)');
+    figure(3); plot (dat');
+    % END DEBUG CODE
+
+    [cost, dy] = solar_mismatch (double ([az, ze]), sunPos, ...
+                                 double (seen), bigm, big, max_seen, data, s);
+    if ~isfinite (cost)
+      [az, ze, bigm, big] = find_feasible (az, ze, sunPos, ...
+                                           double (seen), bigm, big, ...
+                                           max_seen, data, s, dy);
+    end
+      % Lower limit of 1 for ze, as ze=0 gives plateau for az.
+      [X, cost] = fmincon (@(X) solar_mismatch (X, sunPos, double (seen),...
+<<<<<<< 786f763e1dcd095fed3c8393639dbed038bca049
+                                             bigm, big), ...
+=======
+                                               bigm, big, max_seen, data, s), ...
+>>>>>>> findSolarOrientation.m fit_all_solar.m: Ensure capacity is enough to account for all negative consumption.  (Slow.)
+                           double ([az, ze]), ...
+                           [], [], [], [], [-90, 1], [90, 45], [], ...
+                         options);
+    az  = X(1);
+    ze  = X(2);
+      [~, ~, cap] = solar_mismatch ([az, ze], sunPos, double (seen), bigm, big, ...
+                            max_seen, data, s);
+      if cost > 0.99 * old_cost && cost <= old_cost
+        break;
+      end
+      old_cost = cost;
+    end
+  disp ([az, ze, cap, cost])
+  gen   = cap*angle_coefficient(sunPos, az, ze);
+  figure(11); plot (capFactor');
+
+  capacity = cap;
+  mx_start = 5;
+  dy = squeeze (seen(1, :,(1:size(sunPos,2))+solar_start-1)) - gen;
+  mismatch = max(max(abs(dy(:,mx_start:end-mx_start))));
+  mismatch = mismatch / max(gen(:));
+end
+
+function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, bigm, big, ...
+                                                max_seen, data, s)
+  az  = X(1);
+  ze  = X(2);
+
+  gen_cap  = angle_coefficient(sunPos, az, ze);
+  cap_max = squeeze (seen(1, bigm(:))) ./ gen_cap(big(:))';
+
+  try
+  capFactor = zeros (size (data));
+  catch
+    keyboard
+  end
+  for i = 1:365
+    for j = 0:(s.dark_start-s.dark_end)
+      % Estimate generation at this time, assuming no cloud
+      p1 = cosd(ze);
+      p2 = sind(ze).*cosd(s.pp(i,j+1) - az);
+      capFactor(i,j + s.dark_end) ...
+        = max (0,   bsxfun (@times, s.s1(i,j+1), p1) ...
+        + bsxfun (@times, s.s2(i,j+1), p2))';
+    end
+  end
+  big_all = bsxfun (@gt, capFactor, 0.5 * max (capFactor, [], 2));
+  cap_min = squeeze (-2 * data(big_all(:)) ./ capFactor(big_all(:)));
+
+  cap_max = max (cap_max);
+  cap_min = max (cap_min);
+  cap_min = double (cap_min);
+
+                                     % sum([]) = 0
+  if ~isfinite (az + ze) || ~isfinite (sum (cap_max + cap_min))
+    cost = inf;
+    cap = 0;
+    dy = [];
+    return
+  end
+
+  if cap_max > cap_min
+    cap = cap_min:max (0.01, (cap_max - cap_min) / 100):cap_max + 0.01;
+  elseif cap_min > cap_max
+    cap = cap_min;          % smallest feasible power
+  else
+    if ~isempty (cap_max)
+      cap = cap_max;    % X:0:Y yields an empty range, so avoid it.
+    else
+      cap = cap_min;
+    end
+  end
+
+  gen = bsxfun (@times, cap', gen_cap(big)');
+  dy(:, big) = bsxfun (@minus, squeeze (seen(1, bigm)), gen);
+  f = (dy > 0);
+  dy(f) = 2 * dy(f);
+
+  ddy(:, big) = bsxfun (@minus, squeeze (seen(2, bigm)), gen);
+  f = (ddy > 0);
+  if any (f(:))
+    dy(f) = dy(f) + 8 * ddy(f);
+
+    ddy(:, big) = bsxfun (@minus, squeeze (seen(3, bigm)), gen);
+    f = (ddy > 0);
+    dy(f) = dy(f) + 90 * ddy(f);
+  end
+
+  cost = diag (dy(:,:) * dy(:,:)');
+  [~, idx] = min (cost);
+  cap  = cap(idx);
+  cost = cost(idx);
+
+  tmp = gen(idx, :);
+  gen = zeros (size (big));
+  gen(big) = tmp;
+  figure(10); plot (1:size (gen, 2), gen', 'k', 1:21, squeeze (seen(:, 1, 14:34))', 'g', 1:21, squeeze (seen(:, 2, 14:34))', 'r')
+end
+
+function ac = angle_coefficient (sun, az, ze)
+% Fraction of irradience actually received by solar panel,
+% given angle of sun and orientation of solar panel.
+% Optimzed for  sun  being a vector, and  az and ze being scalars,
+% but all/any can be vectors, provided dimensions either match or are 1.
+    if numel (sun) == numel ([sun.zenith])
+        zenith  = reshape([sun.zenith],  size(sun));	% list -> vector
+        azimuth = reshape([sun.azimuth], size(sun));
+    else
+        zenith  = [sun.zenith];	% list -> vector
+        azimuth = [sun.azimuth];
+        if size(sun,2) > 1
+            zenith  = zenith';
+            azimuth = azimuth';
+        end
+    end
+
+    s1 = cosd(zenith);
+    s2 = sind(zenith).*cosd(azimuth - az);
+
+    p1 = cosd(ze);
+    p2 = sind(ze);
+
+    ac = max(0, bsxfun(@times, s1, p1) + bsxfun(@times, s2, p2));
+end
+
+function [az, ze, bigm, big] = find_feasible (az, ze, sunPos, ...
+                                              seen, bigm, big, ...
+                                              max_seen, data, s, dy)
+  [cost, dy] = solar_mismatch (double ([az, 3]), sunPos, double (seen), ...
+                               bigm, big, max_seen, data, s);
+  if isfinite (cost)
+    ze = 3;
+    return;
+  end
+  [cost, dy] = solar_mismatch (double ([(az+90)/2, ze]), sunPos, double (seen), ...
+                               bigm, big, max_seen, data, s);
+  if isfinite (cost)
+    az = (az+90)/2;
+    return;
+  end
+  [cost, dy] = solar_mismatch (double ([(az-90)/2, ze]), sunPos, double (seen), ...
+                               bigm, big, max_seen, data, s);
+  if isfinite (cost)
+    az = (az-90)/2;
+    return;
+  end
+ 
+  for i = 1:size (big, 2)
+    big(:,  [i, end+1-i]) = 0;
+    bigm(:, [end-size(big,2)+i, end+1-i]) = 0;
+    [cost, dy] = solar_mismatch (double ([az, ze]), sunPos, double (seen), ...
+                                 bigm, big, max_seen, data, s);
+    if isfinite (cost)
+      return;
+    end
+  end
+end
