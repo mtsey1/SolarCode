@@ -278,9 +278,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     my_data = my_data(:, s.dark_end:s.dark_start);
 
     tic
-    [cap(i), az(i), ze(i), ~, mismatch(i), funcs] = findSolarOrientation (seen,...
-      sp, meta.SamPerDay, solar_range, ...
-      my_data, s, hot_days, cold_days);
+    [cap(i), az(i), ze(i), ~, mismatch(i), funcs] = findSolarOrientation (seen, sp, meta.SamPerDay, solar_range, my_data, s, hot_days, cold_days);
 
     if ~autofit
       if ~exist ('solar_by_pc', 'var')

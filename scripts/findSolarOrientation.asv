@@ -51,38 +51,38 @@ function [capacity, az, ze, dy, mismatch, funcs] ...
 
   max_seen = double (max (seen(:)));
   cost = solar_mismatch (double ([az, ze]), sunPos, ...
-                               double (seen), big, max_seen, data(big_all), sun_pos, s.location.latitude);
+                               double (seen), big, max_seen, data(big_all), sun_pos);
   if ~isfinite (cost)
     [az, ze, big] = find_feasible (az, ze, sunPos, ...
                                          double (seen), big, ...
-                                         max_seen, data(big_all), sun_pos, s.location.latitude);
+                                         max_seen, data(big_all), sun_pos);
   end
   old_cost = 1e90;
   for n = 1:2
     tic
     % Lower limit of 1 for ze, as ze=0 gives plateau for az.
     [X, cost] = fmincon (@(X) solar_mismatch (X, sunPos, double (seen),...
-                                             big, max_seen, data(big_all), sun_pos, s.location.latitude), ...
+                                             big, max_seen, data(big_all), sun_pos), ...
                          double ([az, ze]), ...
                          [], [], [], [], [-90, 1], [90, 45], [], ...
                          options);
     az  = X(1);
     ze  = X(2);
     [~, ~, cap] = solar_mismatch ([az, ze], sunPos, double (seen), big, ...
-                          max_seen, data(big_all), sun_pos, s.location.latitude);
+                          max_seen, data(big_all), sun_pos);
 
 %    fprintf ('pass 1: %g\n', toc);
     if ~isfinite (cap)
       tic
       [X, cost] = fmincon (@(X) solar_mismatch (X, sunPos, double (seen),...
-                                               big, max_seen, data(big_all), sun_pos, s.location.latitude), ...
+                                               big, max_seen, data(big_all), sun_pos), ...
                            double ([az, ze]), ...
                            [], [], [], [], [-90, 1], [90, 45], [], ...
                            options);
       az  = X(1);
       ze  = X(2);
       [~, ~, cap] = solar_mismatch ([az, ze], sunPos, double (seen), big, ...
-                            max_seen, data(big_all), sun_pos, s.location.latitude);
+                            max_seen, data(big_all), sun_pos);
       %fprintf ('\t\t\tpass 2: %g\n', toc);
     end
     if cost > 0.99 * old_cost && cost <= old_cost
@@ -101,7 +101,7 @@ end
 
 
 function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
-                                                max_seen, data, sun_pos, lat)
+                                                max_seen, data, sun_pos)
   az  = X(1);
   ze  = X(2);
   sigma = 0.40905;
@@ -111,9 +111,8 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
 
   %capFactor = max (0, cosd (ze) * sun_pos.s1 ...
                       %+ sind (ze) * cosd (sun_pos.pp - az) .* sun_pos.s2);
-  l = lat;
+  l = s.location.latitude;
   eps = 0.4095*180/pi;
-  t=sun_pos.pp;
   a = t-asind((sind(t)*cosd(l-eps))/(sqrt(1-(cosd(t)*cosd(l-eps)).^2))*(cosd(ze)/sin(ze)));    
   capFactor = max(0, cosd(t) * cosd(l-eps) * cosd(ze)  ... 
       + sqrt(1-(cosd(t) * cosd(l-eps)).^2) * sind(ze) * cosd(t-a));
@@ -210,19 +209,19 @@ function [az, ze, big] = find_feasible (az, ze, sunPos, ...
                                               seen, big, ...
                                               max_seen, data, sun_pos)
   cost = solar_mismatch (double ([az, 3]), sunPos, double (seen), ...
-                               big, max_seen, data, sun_pos, s.location.latitude);
+                               big, max_seen, data, sun_pos);
   if isfinite (cost)
     ze = 3;
     return;
   end
   cost = solar_mismatch (double ([(az+90)/2, ze]), sunPos, double (seen), ...
-                               big, max_seen, data, sun_pos, s.location.latitude);
+                               big, max_seen, data, sun_pos);
   if isfinite (cost)
     az = (az+90)/2;
     return;
   end
   cost = solar_mismatch (double ([(az-90)/2, ze]), sunPos, double (seen), ...
-                               big, max_seen, data, sun_pos, s.location.latitude);
+                               big, max_seen, data, sun_pos);
   if isfinite (cost)
     az = (az-90)/2;
     return;
