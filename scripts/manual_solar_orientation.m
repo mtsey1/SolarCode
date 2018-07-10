@@ -483,11 +483,15 @@ function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] 
     for i = 1:size (data, 2)
       for j = 0:(s.dark_start-s.dark_end)
         % Estimate generation at this time, assuming no cloud
+        
+        
         p1 = cosd(ze);
         p2 = sind(ze).*cosd(s.pp(i,j+1) - az);
         solar_correction(j+s.dark_end, i) ...
                   = max (0,   bsxfun (@times, s.s1(i,j+1), p1) ...
                             + bsxfun (@times, s.s2(i,j+1), p2))';
+                        
+
       end
     end
     solar_correction = solar_correction * (24 / size(data,1) * cap);
@@ -861,7 +865,7 @@ function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] 
 
       if length(local_data) > 1
           % Initial estimates, chosen heuristically:
-          % Capacity is the maximum observed nett generation
+          % Capacity is the maximum observed net generation
           % Azimuth is roughly proportional to the square of
           % the time of the peak nett generation (with midday being 0),
           % clipped to be between due east and due west

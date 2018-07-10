@@ -394,7 +394,7 @@ end
     % Should estimate heating for each hour of the day, to correct winter
     % solar estimates
 
-if ~PRINT_THIS_PHASE
+if PRINT_THIS_PHASE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Recalculate solar, correcting for periodic loads
 

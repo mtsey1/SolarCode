@@ -114,7 +114,7 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
   eps = 0.4095*180/pi;
   a = t-asind((sind(t)*cosd(l-eps))/(sqrt(1-(cosd(t)*cosd(l-eps)).^2))*(cosd(ze)/sin(ze)));    
   capFactor = max(0, cosd(t) * cosd(l-eps) * cosd(ze)  ... 
-      + sqrt(1-(cosd(t) * cosd(l-eps)).^2) * sind(ze) * cosd(t-a);
+      + sqrt(1-(cosd(t) * cosd(l-eps)).^2) * sind(ze) * cosd(t-a));
   % Find minimum capacity that causes no half-hour to have negative
   % consumption.
   % The factor of 2 comes because cap is in kW,
