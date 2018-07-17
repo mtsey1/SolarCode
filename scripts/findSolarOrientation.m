@@ -102,6 +102,9 @@ end
 
 function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
                                                 max_seen, data, sun_pos, lat)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%my code%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
   l = lat;
   eps = 0.40905*180/pi;
   ze  = X(2);
@@ -121,6 +124,30 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
   t=sun_pos.pp;
   capFactor = max(0, cosd(t) * cosd(l-eps) * cosd(ze)  ... 
       + sqrt(1-(cosd(t) .* cosd(l-eps)).^2) * sind(ze) .* cosd(t-az));
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%/my code%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+%%%%%%%%%%%%%%%%%%%%%%%%%%My Method%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+if 1==0
+    Xrot = [1,0,0;0,cosd(x),sind(x);0,-sind(x),cosd(x)];
+    Yrot = [cosd(y),0,-sind(y);0,1,0;sind(y),0,cosd(y)];
+
+    Panel_Norm = Yrot*Xrot*[0;0;1];
+
+    sunXYZ = [sind(sun_pos.s1)*cosd(sun_pos.pp)
+        cosd(sun_pos.s1)*cosd(sun_pos.pp)
+        sind(sun_pos.pp)];
+
+    capFactor = acosd(sunXYZ,Panel_Norm);
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%/My Method%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+  
   % Find minimum capacity that causes no half-hour to have negative
   % consumption.
   % The factor of 2 comes because cap is in kW,
