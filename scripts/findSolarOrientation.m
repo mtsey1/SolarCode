@@ -58,14 +58,19 @@ function [capacity, az, ze, dy, mismatch, funcs] ...
                                          max_seen, data(big_all), sun_pos, s.location.latitude);
   end
   old_cost = 1e90;
+  az = 0;
+  ze = 0;
   for n = 1:2
     tic
     % Lower limit of 1 for ze, as ze=0 gives plateau for az.
     [X, cost] = fmincon (@(X) solar_mismatch (X, sunPos, double (seen),...
                                              big, max_seen, data(big_all), sun_pos, s.location.latitude), ...
                          double ([az, ze]), ...
-                         [], [], [], [], [-90, 1], [90, 45], [], ...
+                         [], [], [], [], [-30, 1], [30, 45], [], ...
                          options);
+    if isnan(X(1))||isnan(X(2))
+        fprintf('X is NaN\n');
+    end
     az  = X(1);
     ze  = X(2);
     [~, ~, cap] = solar_mismatch ([az, ze], sunPos, double (seen), big, ...
@@ -105,26 +110,33 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%my code%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-  l = lat;
   eps = 0.40905*180/pi;
   ze  = X(2);
   if 0==1
     az  = X(1);
   else
     t   = X(1);
-    az = t-asind((sind(t).*cosd(l-eps))/(sqrt(1-(cosd(t).*cosd(l-eps)).^2))*(cosd(ze)/sin(ze)));
+    az = t-asind((cosd(ze)/sind(ze))*((sind(t).*cosd(lat-eps))/(sqrt(1-(cosd(t).*cosd(lat-eps)).^2))));
   end
 
+  if ~isreal(az)
+    cost = inf;
+    cap = 0;
+    dy = [];
+    return
+  end 
   
   gen_cap  = angle_coefficient(sunPos, az, ze);
   cap_max = squeeze (seen(1, big(:))) ./ gen_cap(big(:))';
 
   %capFactor = max (0, cosd (ze) * sun_pos.s1 ...
                       %+ sind (ze) * cosd (sun_pos.pp - az) .* sun_pos.s2);
+  %find the potential output of the panel for all t
   t=sun_pos.pp;
-  capFactor = max(0, cosd(t) * cosd(l-eps) * cosd(ze)  ... 
-      + sqrt(1-(cosd(t) .* cosd(l-eps)).^2) * sind(ze) .* cosd(t-az));
-  
+  capFactor = max(0.000001, cosd(t) * cosd(lat-eps) * cosd(ze)  ... 
+      + sqrt(1-(cosd(t) .* cosd(lat-eps)).^2) * sind(ze) .* cosd(t-az));
+ 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%/my code%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -239,21 +251,21 @@ end
 
 function [az, ze, big] = find_feasible (az, ze, sunPos, ...
                                               seen, big, ...
-                                              max_seen, data, sun_pos)
+                                              max_seen, data, sun_pos, lat)
   cost = solar_mismatch (double ([az, 3]), sunPos, double (seen), ...
-                               big, max_seen, data, sun_pos, s.location.latitude);
+                               big, max_seen, data, sun_pos, lat);
   if isfinite (cost)
     ze = 3;
     return;
   end
   cost = solar_mismatch (double ([(az+90)/2, ze]), sunPos, double (seen), ...
-                               big, max_seen, data, sun_pos, s.location.latitude);
+                               big, max_seen, data, sun_pos, lat);
   if isfinite (cost)
     az = (az+90)/2;
     return;
   end
   cost = solar_mismatch (double ([(az-90)/2, ze]), sunPos, double (seen), ...
-                               big, max_seen, data, sun_pos, s.location.latitude);
+                               big, max_seen, data, sun_pos, lat);
   if isfinite (cost)
     az = (az-90)/2;
     return;

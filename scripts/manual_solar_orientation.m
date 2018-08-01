@@ -906,7 +906,7 @@ function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] 
       if ~isfinite (cost)
         [az, ze, big] = find_feasible (az, ze, local_sunPos, ...
                                              double (local_seen), big, ...
-                                             max_seen, my_data(big_all), sun_pos, dy, solar_range);
+                                             max_seen, my_data(big_all), sun_pos,s.location.latitude);
       end
 
       if(az_locked_flag)
