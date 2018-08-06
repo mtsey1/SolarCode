@@ -37,8 +37,8 @@ function [capacity, az, ze, dy, mismatch, funcs] ...
       % the time of the peak nett generation (with midday being 0),
       % clipped to be between due east and due west
       cap = max(mx);
-      %az = (((mean(mx_pos) + solar_range(1)-1) * -360/SamPerDay) + 180);
-      az = az * abs(az/10);
+      az = (((mean(mx_pos) + solar_range(1)-1) * -360/SamPerDay) + 180);
+      %az = az * abs(az/10);
       az = max (-90, min (90, az));
       ze = 10;		% ~ sun's summer zenith angle in Melbourne
   else                % initialise from previous run
@@ -126,14 +126,17 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
   
   gen_cap  = angle_coefficient(sunPos, az, ze);
   cap_max = squeeze (seen(1, big(:))) ./ gen_cap(big(:))';
-
+    fprintf('t is %f\n', t)
+    fprintf('ze is %f\n', ze)
   %capFactor = max (0, cosd (ze) * sun_pos.s1 ...
                       %+ sind (ze) * cosd (sun_pos.pp - az) .* sun_pos.s2);
   %find the potential output of the panel for all t
   t=sun_pos.pp;
   capFactor = max(0.000001, cosd(t) * cosd(lat-eps) * cosd(ze)  ... 
       + sqrt(1-(cosd(t) .* cosd(lat-eps)).^2) * sind(ze) .* cosd(t-az));
- 
+    %fprintf('capFactor is %f\n', capFactor)
+    fprintf('az is %f\n', az)
+    
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%/my code%%%%%%%%%%%%%%%%%%%%%%%%
@@ -152,7 +155,7 @@ if 1==0
         cosd(sun_pos.s1)*cosd(sun_pos.pp)
         sind(sun_pos.pp)];
 
-    capFactor = acosd(sunXYZ,Panel_Norm);
+    capFactor = max(0,acosd(sunXYZ,Panel_Norm));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%/My Method%%%%%%%%%%%%%%%%%%%%%%

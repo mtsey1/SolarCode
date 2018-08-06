@@ -126,14 +126,17 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
   
   gen_cap  = angle_coefficient(sunPos, az, ze);
   cap_max = squeeze (seen(1, big(:))) ./ gen_cap(big(:))';
-
+    fprintf('t is %f\n', t)
+    fprintf('ze is %f\n', ze)
   %capFactor = max (0, cosd (ze) * sun_pos.s1 ...
                       %+ sind (ze) * cosd (sun_pos.pp - az) .* sun_pos.s2);
   %find the potential output of the panel for all t
   t=sun_pos.pp;
   capFactor = max(0.000001, cosd(t) * cosd(lat-eps) * cosd(ze)  ... 
       + sqrt(1-(cosd(t) .* cosd(lat-eps)).^2) * sind(ze) .* cosd(t-az));
- 
+    %fprintf('capFactor is %f\n', capFactor)
+    fprintf('az is %f\n', az)
+    
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%/my code%%%%%%%%%%%%%%%%%%%%%%%%
@@ -152,7 +155,7 @@ if 1==0
         cosd(sun_pos.s1)*cosd(sun_pos.pp)
         sind(sun_pos.pp)];
 
-    capFactor = acosd(sunXYZ,Panel_Norm);
+    capFactor = max(0,acosd(sunXYZ,Panel_Norm));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%/My Method%%%%%%%%%%%%%%%%%%%%%%
