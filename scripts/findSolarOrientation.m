@@ -38,7 +38,7 @@ function [capacity, az, ze, dy, mismatch, funcs] ...
       % clipped to be between due east and due west
       cap = max(mx);
       az = (((mean(mx_pos) + solar_range(1)-1) * -360/SamPerDay) + 180);
-      %az = az * abs(az/10);
+      az = az * abs(az/10);
       az = max (-90, min (90, az));
       ze = 10;		% ~ sun's summer zenith angle in Melbourne
   else                % initialise from previous run
@@ -68,6 +68,9 @@ function [capacity, az, ze, dy, mismatch, funcs] ...
                          options);
     if isnan(X(1))||isnan(X(2))
         fprintf('X is NaN\n');
+        while 1==1
+            pause(0.1);
+        end
     end
     az  = X(1);
     ze  = X(2);
@@ -109,8 +112,9 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%my code%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
   eps = 0.40905*180/pi;
+  if 1==0
   ze  = X(2);
-  if 0==1
+  if 1==0
     az  = X(1);
   else
     t   = X(1);
@@ -131,31 +135,38 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
   %capFactor = max (0, cosd (ze) * sun_pos.s1 ...
                       %+ sind (ze) * cosd (sun_pos.pp - az) .* sun_pos.s2);
   %find the potential output of the panel for all t
+  
+  
   t=sun_pos.pp;
   capFactor = max(0.000001, cosd(t) * cosd(lat-eps) * cosd(ze)  ... 
       + sqrt(1-(cosd(t) .* cosd(lat-eps)).^2) * sind(ze) .* cosd(t-az));
+  
     %fprintf('capFactor is %f\n', capFactor)
     fprintf('az is %f\n', az)
-    
+  end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%/my code%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-%%%%%%%%%%%%%%%%%%%%%%%%%%My Method%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%My Method%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-if 1==0
+if 1==1
+    x = X(1);
+    y = X(2);
+    fprintf('x = %f, y = %f\n', x,y);
+    gen_cap  = angle_coefficient(sunPos, x, y);
+    cap_max = squeeze (seen(1, big(:))) ./ gen_cap(big(:))';
     Xrot = [1,0,0;0,cosd(x),sind(x);0,-sind(x),cosd(x)];
     Yrot = [cosd(y),0,-sind(y);0,1,0;sind(y),0,cosd(y)];
-
+    fprintf('Xrot = %f, Yrot = %f\n', Xrot,Yrot);
     Panel_Norm = Yrot*Xrot*[0;0;1];
 
-    sunXYZ = [sind(sun_pos.s1)*cosd(sun_pos.pp)
-        cosd(sun_pos.s1)*cosd(sun_pos.pp)
-        sind(sun_pos.pp)];
+    sunXYZ = [sind(sun_pos.s1).*cosd(sun_pos.pp),cosd(sun_pos.s1).*cosd(sun_pos.pp), sind(sun_pos.pp)];
 
-    capFactor = max(0,acosd(sunXYZ,Panel_Norm));
+    capFactor = max(0,((sunXYZ*Panel_Norm)));
+    fprintf(' avg capFactor = %f\n', mean(capFactor));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%/My Method%%%%%%%%%%%%%%%%%%%%%%
@@ -168,11 +179,11 @@ end
   cap_min = -2 * data ./ capFactor;
 
   cap_max = 2 * max (cap_max);
-  cap_min = max (cap_max / 10, max (cap_min));
+  cap_min = max (cap_max / 10, min (cap_min));
   cap_min = double (cap_min);
 
                                      % sum([]) = 0
-  if ~isfinite (az + ze) || ~isfinite (sum (cap_max + cap_min))
+  if ~isfinite (x + y) || ~isfinite (sum (cap_max + cap_min))
     cost = inf;
     cap = 0;
     dy = [];
