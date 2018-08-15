@@ -269,7 +269,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     solar_range = s.solar_start:s.solar_end;
     solar_range = solar_range(:);
 
-    autofit = true;
+    autofit = false;
     if isempty (cold_days)
       i = i + 1;
       continue;
@@ -284,7 +284,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
       if ~exist ('solar_by_pc', 'var')
         load solar_by_pc;
       end
-      irradiation = ones (size (my_data'));
+      irradiation = ones (size (squeeze (data(i,:,:))'));
       irradiation(s.dark_end:s.dark_start,:) = 2 * ...
       squeeze (solar_by_pc (meta.pclist == meta.postcode(i),:,:))';
       [az(i), ze(i), cap(i), abort, orientation_data, jump_to_unsaved, jump_to_house] = manual_solar_orientation (az(i), ze(i), cap(i), seen, sp, squeeze (data(i,:,:))', squeeze (data_no_vamp(i,:,:))', s, hot_days, cold_days, s.solar_start, s.solar_end, solar_range, meta, meta.UserOffset + i, orientation_data_cell, disconnected(:,i), irradiation, funcs);

@@ -64,7 +64,7 @@ function [capacity, az, ze, dy, mismatch, funcs] ...
         [X, cost] = fmincon (@(X) solar_mismatch (X, sunPos, double (seen),...
                                              big, max_seen, data(big_all), sun_pos, s.location.latitude), ...
                          double ([az, ze]), ...
-                         [], [], [], [], [-30, 1], [30, 45], [], ...
+                         [], [], [], [], [-180, 1], [180, 45], [], ...
                          options);
     if isnan(X(1))||isnan(X(2))
         fprintf('X is NaN\n');
@@ -155,18 +155,18 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
 if 1==1
     x = X(1);
     y = X(2);
-    fprintf('x = %f, y = %f\n', x,y);
+    %fprintf('x = %f, y = %f\n', x,y);
     gen_cap  = angle_coefficient(sunPos, x, y);
     cap_max = squeeze (seen(1, big(:))) ./ gen_cap(big(:))';
     Xrot = [1,0,0;0,cosd(x),sind(x);0,-sind(x),cosd(x)];
     Yrot = [cosd(y),0,-sind(y);0,1,0;sind(y),0,cosd(y)];
-    fprintf('Xrot = %f, Yrot = %f\n', Xrot,Yrot);
+    %fprintf('Xrot = %f, Yrot = %f\n', Xrot,Yrot);
     Panel_Norm = Yrot*Xrot*[0;0;1];
 
     sunXYZ = [sind(sun_pos.s1).*cosd(sun_pos.pp),cosd(sun_pos.s1).*cosd(sun_pos.pp), sind(sun_pos.pp)];
 
     capFactor = max(0,((sunXYZ*Panel_Norm)));
-    fprintf(' avg capFactor = %f\n', mean(capFactor));
+    %fprintf(' avg capFactor = %f\n', mean(capFactor));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%/My Method%%%%%%%%%%%%%%%%%%%%%%
