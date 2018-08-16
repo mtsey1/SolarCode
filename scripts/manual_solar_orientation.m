@@ -778,7 +778,7 @@ function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] 
 
     max_seen = double (max (local_seen(:)));
     cost = funcs.solar_mismatch (double ([az, ze]), local_sunPos, ...
-                                 double (local_seen), big, max_seen, my_data(big_all), sun_pos);
+                                 double (local_seen), big, max_seen, my_data(big_all), sun_pos,s.location.latitude);
     fprintf ('mismatch %g\n', cost);
   end
 
@@ -902,7 +902,7 @@ function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] 
 
       max_seen = double (max (local_seen(:)));
       [cost, dy] = funcs.solar_mismatch (double ([az, ze]), local_sunPos, ...
-                                   double (local_seen), big, max_seen, my_data(big_all), sun_pos);
+                                   double (local_seen), big, max_seen, my_data(big_all), sun_pos,s.location.latitude);
       if ~isfinite (cost)
         [az, ze, big] = find_feasible (az, ze, local_sunPos, ...
                                              double (local_seen), big, ...
@@ -915,17 +915,17 @@ function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] 
           upper_bound = 45;
 
           f2 = @(X) funcs.solar_mismatch ([locked_ze, X], local_sunPos, double (local_seen),...
-                                                   big, max_seen, my_data(big_all), sun_pos);
+                                                   big, max_seen, my_data(big_all), sun_pos,s.location.latitude);
       elseif(ze_locked_flag)
           f2 = @(X) funcs.solar_mismatch ([X, locked_ze], local_sunPos, double (local_seen),...
-                                                   big, max_seen, my_data(big_all), sun_pos);
+                                                   big, max_seen, my_data(big_all), sun_pos,s.location.latitude);
 
           initial_params = az;
           lower_bound = -90;
           upper_bound = 90;
       else
           f2 = @(X) funcs.solar_mismatch (X, local_sunPos, double (local_seen),...
-                                                   big, max_seen, my_data(big_all), sun_pos);
+                                                   big, max_seen, my_data(big_all), sun_pos,s.location.latitude);
 
           initial_params = [az ze];
           lower_bound = [-90 1];
@@ -952,7 +952,7 @@ function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] 
             ze  = X(2);
         end
         [~, ~, cap] = funcs.solar_mismatch ([az, ze], local_sunPos, double (local_seen), big, ...
-                              max_seen, my_data(big_all), sun_pos);
+                              max_seen, my_data(big_all), sun_pos,s.location.latitude);
 
         % fprintf ('pass 1: %g\n', toc);
         if ~isfinite (cap)
@@ -972,7 +972,7 @@ function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] 
                 ze  = X(2);
             end
           [~, ~, cap] = funcs.solar_mismatch ([az, ze], local_sunPos, double (local_seen), big, ...
-                                max_seen, my_data(big_all), sun_pos);
+                                max_seen, my_data(big_all), sun_pos,s.location.latitude);
           %fprintf ('\t\t\tpass 2: %g\n', toc);
         end
         if cost > 0.99 * old_cost && cost <= old_cost

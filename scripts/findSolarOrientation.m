@@ -111,16 +111,20 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%my code%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+  OldTest = 0;
   eps = 0.40905*180/pi;
-  if 1==0
-  ze  = X(2);
+  if OldTest
+     ze  = X(2);
   if 1==0
     az  = X(1);
   else
     t   = X(1);
+    if t == 0
+        t = 0.001;
+    end
     az = t-asind((cosd(ze)/sind(ze))*((sind(t).*cosd(lat-eps))/(sqrt(1-(cosd(t).*cosd(lat-eps)).^2))));
   end
-
+    
   if ~isreal(az)
     cost = inf;
     cap = 0;
@@ -133,7 +137,7 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
     fprintf('t is %f\n', t)
     fprintf('ze is %f\n', ze)
   %capFactor = max (0, cosd (ze) * sun_pos.s1 ...
-                      %+ sind (ze) * cosd (sun_pos.pp - az) .* sun_pos.s2);
+                     % + sind (ze) * cosd (sun_pos.pp - az) .* sun_pos.s2);
   %find the potential output of the panel for all t
   
   
@@ -142,7 +146,7 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
       + sqrt(1-(cosd(t) .* cosd(lat-eps)).^2) * sind(ze) .* cosd(t-az));
   
     %fprintf('capFactor is %f\n', capFactor)
-    fprintf('az is %f\n', az)
+    %fprintf('az is %f\n', az)
   end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
@@ -152,16 +156,16 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%My Method%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-if 1==1
-    x = X(1);
-    y = X(2);
+if ~OldTest
+    az = X(1);
+    ze = X(2);
     %fprintf('x = %f, y = %f\n', x,y);
-    gen_cap  = angle_coefficient(sunPos, x, y);
+    gen_cap  = angle_coefficient(sunPos, az, ze);
     cap_max = squeeze (seen(1, big(:))) ./ gen_cap(big(:))';
-    Xrot = [1,0,0;0,cosd(x),sind(x);0,-sind(x),cosd(x)];
-    Yrot = [cosd(y),0,-sind(y);0,1,0;sind(y),0,cosd(y)];
+    Xrot = [1,0,0;0,cosd(az),sind(az);0,-sind(az),cosd(az)];
+    Yrot = [cosd(ze),0,-sind(ze);0,1,0;sind(ze),0,cosd(ze)];
     %fprintf('Xrot = %f, Yrot = %f\n', Xrot,Yrot);
-    Panel_Norm = Yrot*Xrot*[0;0;1];
+    Panel_Norm = Xrot*(Yrot*[0;0;1]);
 
     sunXYZ = [sind(sun_pos.s1).*cosd(sun_pos.pp),cosd(sun_pos.s1).*cosd(sun_pos.pp), sind(sun_pos.pp)];
 
@@ -183,7 +187,7 @@ end
   cap_min = double (cap_min);
 
                                      % sum([]) = 0
-  if ~isfinite (x + y) || ~isfinite (sum (cap_max + cap_min))
+  if ~isfinite (az + ze) || ~isfinite (sum (cap_max + cap_min))
     cost = inf;
     cap = 0;
     dy = [];

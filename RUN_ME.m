@@ -63,6 +63,20 @@ else
   meta.timestamp_uses_daylightsaving = true;
 end
 
+if 0>0
+    bulkDataPath = 'C:\Users\seymo\OneDrive\Documents\y5\FYP\Data\Swiss';
+    metaDataPath = bulkDataPath;
+    %Switzerland
+    Year = 2015;
+    hemisphere = 'north';
+    time.UTC = 2;
+    location.longitude = 7.519069;
+    location.latitude = 47.50685;
+    location.altitude = 400;
+    meta.SamPerDay = 48;
+    
+end
+
 time.year = Year;
 meta.time = time;
 meta.location = location;
