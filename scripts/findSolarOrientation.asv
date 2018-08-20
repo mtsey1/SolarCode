@@ -40,7 +40,7 @@ function [capacity, az, ze, dy, mismatch, funcs] ...
       az = (((mean(mx_pos) + solar_range(1)-1) * -360/SamPerDay) + 180);
       az = az * abs(az/10);
       az = max (-90, min (90, az));
-      ze = 80;		% ~ sun's summer zenith angle in Melbourne
+      ze = 10;		% ~ sun's summer zenith angle in Melbourne
   else                % initialise from previous run
       cap = data;
       az = smr;
@@ -64,7 +64,7 @@ function [capacity, az, ze, dy, mismatch, funcs] ...
         [X, cost] = fmincon (@(X) solar_mismatch (X, sunPos, double (seen),...
                                              big, max_seen, data(big_all), sun_pos, s.location.latitude), ...
                          double ([az, ze]), ...
-                         [], [], [], [], [-90, 1], [90, 45], @nonlcon, ...
+                         [], [], [], [], [-180, 1], [180, 45], @nonlcon, ...
                          options);
     if isnan(X(1))||isnan(X(2))
         fprintf('X is NaN\n');
@@ -127,10 +127,10 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
     
     fprintf('t is %f\n', t)
     fprintf('ze is %f\n', ze)
-    fprintf('az is %f\n',az)
     
   if ~isreal(az)
-    fprintf('imaginary \n')
+    fprintf('imaginary\n')
+    sind(t
     cost = inf;
     cap = 0;
     dy = [];
@@ -246,9 +246,9 @@ end
 %%%%%%%%%% non-linear constraint - used for tparam %%%%%%%
 function [c,ceq] = nonlcon(x)
     %x(1) is t, x(2) is ze
-    if x(2)<abs(27.4165*sind(x(1)))
+    if x(2)<27.4165*sind(x(1))
         c = 1;
-        ceq = 1;
+        ceq = 0;
         return 
     else
         c = -1;
