@@ -64,10 +64,10 @@ else
 end
 
 if 0>0
-    bulkDataPath = 'C:\Users\seymo\OneDrive\Documents\y5\FYP\Data\Swiss';
+    bulkDataPath = 'C:/Users/seymo/OneDrive/Documents/y5/FYP/Data/Swiss/';
     metaDataPath = bulkDataPath;
     %Switzerland
-    Year = 2015;
+    Year = 2016;
     hemisphere = 'north';
     time.UTC = 2;
     location.longitude = 7.519069;
@@ -93,13 +93,13 @@ DoCnI = 0;
 full_years_only = true;
 
 % Set to a non-zero value to process only  MaxUsers customers
-MaxUsers = 100;
+MaxUsers = 10;
 %MaxUsers = 300;
 %MaxUsers = 1000;
 %MaxUsers = 88000;
 
 % Which phases to execute
-startAt = 2;
+startAt = 1;
 endAt = 2;
 
 % Set to 0 to run from an alternate set of files, and output to "short_..."

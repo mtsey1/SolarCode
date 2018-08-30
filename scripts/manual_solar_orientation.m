@@ -389,7 +389,7 @@ function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] 
         plot (ha, sr, gg1, 'k', sr, gg2, 'k--', ...
                   sr, ss1, 'g', sr, ss2, 'r')
         
-        dlmwrite('tParam.csv',[data_idx,gg1;data_idx,gg2;data_idx,ss1(1,:);data_idx,ss1(2,:);data_idx,ss2(1,:);data_idx,ss2(2,:)],'delimiter',',','-append');
+        %dlmwrite('NewParam.csv',[data_idx,gg1;data_idx,gg2;data_idx,ss1(1,:);data_idx,ss1(2,:);data_idx,ss2(1,:);data_idx,ss2(2,:)],'delimiter',',','-append');
         
         h_lines = findobj(gca,'Type','line');
         xlabel('Time of Day (Half-an-hour)');

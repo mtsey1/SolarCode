@@ -111,7 +111,7 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%my code%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-  T_test = 1;
+  T_test = 0;
   eps = 0.40905*180/pi;
   if T_test
      ze  = X(2);
@@ -246,6 +246,7 @@ end
 %%%%%%%%%% non-linear constraint - used for tparam %%%%%%%
 function [c,ceq] = nonlcon(x)
     %x(1) is t, x(2) is ze
+
     if x(2)<abs(27.4165*sind(x(1)))
         c = 1;
         ceq = 1;
