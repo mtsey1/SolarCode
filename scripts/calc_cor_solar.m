@@ -5,7 +5,7 @@ function [su, cor_solar] = calc_cor_solar (data, s, meta, ind)
   learn_fail_mode = 0;
   
   cor_solar = sparse (length (ind),meta.Days*meta.SamPerDay);
-  su = meta.solar_users;
+  su = s.solar_users;
       % Use '~ ( <= )' instead of '>' to preserve NaN
   su = su(~(su <= meta.UserOffset)) - meta.UserOffset;
   

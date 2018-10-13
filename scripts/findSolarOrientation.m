@@ -40,7 +40,7 @@ function [capacity, az, ze, dy, mismatch, funcs] ...
       az = (((mean(mx_pos) + solar_range(1)-1) * -360/SamPerDay) + 180);
       az = az * abs(az/10);
       az = max (-90, min (90, az));
-      ze = 80;		% ~ sun's summer zenith angle in Melbourne
+      ze = 10;		% ~ sun's summer zenith angle in Melbourne
   else                % initialise from previous run
       cap = data;
       az = smr;
@@ -58,13 +58,25 @@ function [capacity, az, ze, dy, mismatch, funcs] ...
                                          max_seen, data(big_all), sun_pos, s.location.latitude);
   end
   old_cost = 1e90;
+  
+%   for i = -179:180
+%       for j = 1:90
+%           CostMap(j,i+180)=solar_mismatch([i,j],sunPos, double (seen),big, max_seen, data(big_all), sun_pos, s.location.latitude);
+%       end
+%   end
+%   close all
+%   surf(CostMap);
+%   save('costmap.mat','CostMap');
+
+  
+  
   for n = 1:2
     tic
     % Lower limit of 1 for ze, as ze=0 gives plateau for az.
         [X, cost] = fmincon (@(X) solar_mismatch (X, sunPos, double (seen),...
                                              big, max_seen, data(big_all), sun_pos, s.location.latitude), ...
                          double ([az, ze]), ...
-                         [], [], [], [], [-90, 1], [90, 45], @nonlcon, ...
+                         [], [], [], [], [-180, 1], [180, 45], [], ...
                          options);
     if isnan(X(1))||isnan(X(2))
         fprintf('X is NaN\n');
@@ -83,7 +95,7 @@ function [capacity, az, ze, dy, mismatch, funcs] ...
       [X, cost] = fmincon (@(X) solar_mismatch (X, sunPos, double (seen),...
                                                big, max_seen, data(big_all), sun_pos, s.location.latitude), ...
                            double ([az, ze]), ...
-                           [], [], [], [], [-90, 1], [90, 45], @nonlcon, ...
+                           [], [], [], [], [-90, 1], [90, 45], [], ...
                            options);
       az  = X(1);
       ze  = X(2);
@@ -111,9 +123,12 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%my code%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-  T_test = 0;
+
+
+  OldTest = 0;
+%>>>>>>> parent of 41d5bd7... t-parameterisation WORKS - warning: this will mess with other parameterisations
   eps = 0.40905*180/pi;
-  if T_test
+  if OldTest
      ze  = X(2);
   if 1==0
     az  = X(1);
@@ -125,12 +140,7 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
     az = t-asind((cosd(ze)/sind(ze))*((sind(t).*cosd(lat-eps))/(sqrt(1-(cosd(t).*cosd(lat-eps)).^2))));
   end
     
-    fprintf('t is %f\n', t)
-    fprintf('ze is %f\n', ze)
-    fprintf('az is %f\n',az)
-    
   if ~isreal(az)
-    fprintf('imaginary \n')
     cost = inf;
     cap = 0;
     dy = [];
@@ -139,9 +149,11 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
   
   gen_cap  = angle_coefficient(sunPos, az, ze);
   cap_max = squeeze (seen(1, big(:))) ./ gen_cap(big(:))';
-
+    fprintf('t is %f\n', t)
+    fprintf('ze is %f\n', ze)
+   %s1 is zenith, s2 is azimuth
   %capFactor = max (0, cosd (ze) * sun_pos.s1 ...
-   %                   + sind (ze) * cosd (sun_pos.pp - az) .* sun_pos.s2);
+                     % + sind (ze) * cosd (sun_pos.pp - az) .* sun_pos.s2);
   %find the potential output of the panel for all t
   
   
@@ -160,7 +172,7 @@ function [cost, dy, cap, gen] = solar_mismatch (X, sunPos, seen, big, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 %%%%%%%%%%%%%%%%%%%%%%%%%%My Method%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-if ~T_test
+if ~OldTest
     az = X(1);
     ze = X(2);
     %fprintf('x = %f, y = %f\n', x,y);
@@ -261,6 +273,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%s
 
 
+%>>>>>>> parent of 41d5bd7... t-parameterisation WORKS - warning: this will mess with other parameterisations
 function ac = angle_coefficient (sun, az, ze)
 % Fraction of irradience actually received by solar panel,
 % given angle of sun and orientation of solar panel.

@@ -403,7 +403,7 @@ if PRINT_THIS_PHASE
     if ~isempty(solar_user_range)
       solar_users = s.solar_users (solar_user_range);
       corrected = squeeze(data(su,:,:));
-      corrected(:) = corrected(:,:) + full(s.cor_hw(ind(su),:)+cor_pool(su,:));
+      %corrected(:) = corrected(:,:) + full(s.cor_hw(ind(su),:)+cor_pool(su,:));
       [cap, az, ze, seen, capFactor, daily_min, vampires] ...
                           = fit_all_solar (corrected, meta, s);
 

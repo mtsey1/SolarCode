@@ -93,7 +93,7 @@ DoCnI = 0;
 full_years_only = true;
 
 % Set to a non-zero value to process only  MaxUsers customers
-MaxUsers = 10;
+MaxUsers = 100;
 %MaxUsers = 300;
 %MaxUsers = 1000;
 %MaxUsers = 88000;
@@ -129,7 +129,7 @@ meta.real_pools = [];	%real_pools;
 meta.HotDayThresh = 32;
 meta.ColdDayThresh = 15;
 daysIn = @(Y)(365 + (mod(Y,4) == 0 & (mod(Y,100)~=0 | mod(Y,400) == 0)));
-meta.Days = daysIn(Year);
+meta.Days = 365%daysIn(Year);
 DayOffset = 735234 + sum(daysIn(2014:Year));
 meta.peakhours = (6*meta.SamPerDay/24-1):(23*meta.SamPerDay/24);
 meta.ph = length(meta.peakhours);

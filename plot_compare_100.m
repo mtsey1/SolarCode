@@ -38,14 +38,14 @@ for i = 1:99
 end
 
 hold all
-plot(1:99,NewScore(1:99),'r')
+%plot(1:99,NewScore(1:99),'r')
 plot(1:99,OldScore(1:99),'g')
-%plot(1:99,tScore(1:99),'b')
+plot(1:99,tScore(1:99),'b')
 hold off
 
 %%%%
 
-while 1==0%a < 100
+while 1==1%a < 100
     if a == 38
         fprintf('graph 38 does not exist for some reason\n')
         fprintf('displaying graph 39...\n')

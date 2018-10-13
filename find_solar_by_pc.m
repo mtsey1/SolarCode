@@ -5,7 +5,12 @@ function [s] = find_solar_by_pc (s, meta)
   tic;
   for k = 1:length(meta.pclist)
     % Index into solar_users  of those in post code k
-    u = find(s.postcode(s.solar_users) == meta.pclist(k));
+    if ~isempty(s.solar_users)
+        u = 1;
+    else
+        u = find(meta.postcode(s.solar_users) == meta.pclist(k));
+    end
+    
     % May have problems if some have very small cap factor
     % Only consider those that can generate >100W now
     if isempty(u)

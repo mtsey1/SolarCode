@@ -129,7 +129,9 @@ elseif isempty(data)            % Conclude phase 1
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-else                            % Main process, called once per pass
+else 
+    % Main process, called once per pass
+    %s = find_solar_by_pc (s, meta);
     ind = meta.UserOffset + (1:size(data,1));
     state = s;
     state.NMIs = [s.NMIs, meta.NMIs];
@@ -369,6 +371,11 @@ else                            % Main process, called once per pass
 
     solar_users_est = (any(data(:,:) < 0, 2));
     if isnan(meta.solar_users)
+        %solar_users = reshape(solar_users_est,[1,length(solar_users_est)]);
+        solar_users = find( solar_users_est(:)');
+        non_solar   = find(~solar_users_est(:)');
+            
+    elseif isempty(meta.solar_users)
         %solar_users = reshape(solar_users_est,[1,length(solar_users_est)]);
         solar_users = find( solar_users_est(:)');
         non_solar   = find(~solar_users_est(:)');

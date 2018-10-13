@@ -1,9 +1,17 @@
 function [spos, wpos, bpos] = compute_peak_sunpos(data, data_no_vamp, meta, s)
-
-  smr = [meta.January, meta.February, meta.November, meta.December];
-  wtr = [meta.June,meta.July];
-  broad = [meta.May, meta.June, meta.July, meta.August, meta.September];
-
+  if meta.hemisphere=='south'
+    smr = [meta.January, meta.February, meta.November, meta.December];
+    wtr = [meta.June,meta.July];
+    broad = [meta.May, meta.June, meta.July, meta.August, meta.September];
+  else
+    smr = [meta.May, meta.June, meta.July, meta.August, meta.September];
+    wtr = [meta.January,meta.December];
+    broad = [meta.January, meta.February, meta.November, meta.December];      
+  end
+  if size(size(data)) ==[1,2]
+      data=reshape(data,[1,365,48]); 
+      data_no_vamp=reshape(data_no_vamp,[1,365,48]); 
+  end
   % Record maximum in summer, winter and a broadly-defined winter,
   % along with the day of each.
   sz = [size(data,1), size(s.SunPos, 2)];
