@@ -104,7 +104,7 @@ if nargin == 2                  % Set up data structures
             SunPos = sun_position_vector(time, location, true);
             state.s1(i,j+1) = cosd([SunPos.zenith]);
             state.s2(i,j+1) = sind([SunPos.zenith]);
-            state.pp(i,j+1) = SunPos.azimuth;
+            state.pp(i,j+1) = [SunPos.azimuth];
             if (j >= state.solar_start - state.dark_end) && (j + state.dark_end <= state.solar_end)
                 state.SunPos(i,j-state.solar_start+state.dark_end+1) = SunPos;
             end
