@@ -199,7 +199,23 @@ end
   cap_min = -2 * data ./ capFactor;
 
   cap_max = 2 * max (cap_max);
-  cap_min = max (cap_max / 10, min (cap_min));
+  mx = max (cap_max(isfinite (cap_max)));
+  if mx < 4
+    cap_max = 2 * mx;
+  else
+    old_mx = mx + 1;
+    while old_mx ~= mx
+      m = mean (cap_max(cap_max < mx));
+      sd = sqrt (var (cap_max(cap_max < mx)));
+      old_mx = mx;
+      mx = m + 3 * sd;
+    end
+    % Ignore top two values
+    cap_max = 2 * max (cap_max(cap_max < mx));
+  end
+  cap_min = cap_min(isfinite (cap_min));
+  cap_min = max (cap_min(cap_min < mean (cap_min) + 3 * sqrt (var (cap_min))));
+  cap_min = min (cap_max / 10, max (cap_min)/2);
   cap_min = double (cap_min);
 
                                      % sum([]) = 0
