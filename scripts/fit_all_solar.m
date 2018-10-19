@@ -127,15 +127,15 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         ncontour = zeros(size(dnv));
         cont_idx = zeros(size(dnv,1),2);
 
-
+        min_pwr = 0.1;
         for k = 1:size(dnv,1)
             for j = 2:size(dnv,2)
-                if dnv(k,j-1)<0&&dnv(k,j)>0.1
+                if dnv(k,j) > min_pwr
                     %make sure only the first entry happens
                     if cont_idx(k,1)==0
                     cont_idx(k,1) = j-1;
                     end
-                elseif dnv(k,j)<0&&dnv(k,j-1)>0.1
+                elseif dnv(k,j-1) > min_pwr
                     %
                     cont_idx(k,2) = j;
                 end
