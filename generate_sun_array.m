@@ -19,8 +19,9 @@ time_mat = zeros(365,resolution,3);
 
 for i=1:365
     for j=0:resolution-1
-        time_mat(i,j+1,1)=init+(i+j)*0.0208;
         
+        time_mat(i,j+1,1)=datenum(start_year,0,i,(j*24/resolution),0,0);%init+(i*resolution+j)*0.0208;
+
         time.year=str2double(datestr(time_mat(i,j+1),'yyyy'));
         time.month=str2double(datestr(time_mat(i,j+1),'mm'));
         time.day=str2double(datestr(time_mat(i,j+1),'dd'));

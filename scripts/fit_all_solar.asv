@@ -229,7 +229,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         [aze,zee,re] = cart2sph(evec(1),evec(2),evec(3));
 
         crossFit(l,1) = azs.*(180/pi);  crossFit(l,3)=aze.*(180/pi);
-        crossFit(l,2) = -zes.*(180/pi); crossFit(l,4) = -zee.*(180/pi);     
+        crossFit(l,2) = -zes.*(180/pi); crossFit(l,4) = 90-zee.*(180/pi);     
         
     end
     
