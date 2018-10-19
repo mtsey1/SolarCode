@@ -113,6 +113,8 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
 
   jump_to_unsaved = false;
   i = start;
+  s_var = zeros(1, size (data_no_vamp, 1));
+  e_var = s_var;
 
     %%%%%%%%
     %%what i'm doing%%
@@ -213,20 +215,30 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         end
 
         svec = [0,0,0]; evec = [0,0,0];
+        s_all_cross = zeros(3, size(check_start,1)^2 / 2);
+        e_all_cross = s_all_cross;
         %%cross product every combination of vectors
+        i = 1;
         for k = 1:(size(check_start,1)-1)
             for j=(k+1):size(check_start,1)
+               s_all_cross(:,i) = cross(sun_vecs(k,:,1),sun_vecs(j,:,1))'; i = i + 1;
                svec = svec+cross(sun_vecs(k,:,1),sun_vecs(j,:,1));
             end
         end
+
+        i = 1;
         for k = 1:(size(check_stop,1)-1)
             for j=(k+1):size(check_stop,1)
+               e_all_cross(:,i) = cross(sun_vecs(k,:,2),sun_vecs(j,:,2))'; i = i + 1;
                evec = evec+cross(sun_vecs(k,:,2),sun_vecs(j,:,2)); 
             end
         end
 
         [azs,zes,rs] = cart2sph(svec(1),svec(2),svec(3));
         [aze,zee,re] = cart2sph(evec(1),evec(2),evec(3));
+
+        s_var(l) = var(s_all_cross(1,:)) + var(s_all_cross(2,:)) + var(s_all_cross(3,:));
+        e_var(l) = var(e_all_cross(1,:)) + var(e_all_cross(2,:)) + var(e_all_cross(3,:));
 
         crossFit(l,1) = azs.*(180/pi);  crossFit(l,3)=aze.*(180/pi);
         crossFit(l,2) = -zes.*(180/pi); crossFit(l,4) = -zee.*(180/pi);     
