@@ -19,16 +19,13 @@ time_mat = zeros(365,resolution,3);
 
 for i=1:365
     for j=0:resolution-1
-        
-        time_mat(i,j+1,1)=datenum(start_year,0,i,(j*24/resolution),0,0);%init+(i*resolution+j)*0.0208;
+        time.year = start_year;
+        time.month = 1;
+        time.day = i;                   % "Jan 32" = "Feb 1"
+        time.hour = floor (j * 24 / resolution);
+        time.min = 60 * (j * 24 / resolution - time.hour);
+        time.sec = 0;
 
-        time.year=str2double(datestr(time_mat(i,j+1),'yyyy'));
-        time.month=str2double(datestr(time_mat(i,j+1),'mm'));
-        time.day=str2double(datestr(time_mat(i,j+1),'dd'));
-        time.hour=str2double(datestr(time_mat(i,j+1),'hh'));
-        time.min=str2double(datestr(time_mat(i,j+1),'mm'));
-        time.sec=str2double(datestr(time_mat(i,j+1),'ss'));
-        
         sun = sun_position(time,location);
         time_mat(i,j+1,2)=sun.azimuth;
         time_mat(i,j+1,3)=sun.zenith;
