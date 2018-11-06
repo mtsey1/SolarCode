@@ -205,6 +205,9 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         check_start=start_stop(start_stop(:,1,3)<90,1,2:3)*pi/180;
         check_stop=start_stop(start_stop(:,2,3)<90,2,2:3)*pi/180;
         
+        % Average out noise
+        check_start = moving_ave (check_start, 51);
+        check_stop  = moving_ave (check_stop,  51);
         
 
         %%a place to store all of our cartesian sun vectors. 
