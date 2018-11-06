@@ -217,11 +217,16 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         svec = [0,0,0]; evec = [0,0,0];
         s_all_cross = zeros(3, floor (size(check_start,1)^2 / 2));
         e_all_cross = s_all_cross;
+        s_map = permute (zeros (size(check_start,1)), [3 1 2]);
+        e_map = s_map;
         %%cross product every combination of vectors
         i = 1;
         for k = 1:(size(check_start,1)-1)
             for j=(k+1):size(check_start,1)
-               s_all_cross(:,i) = cross(sun_vecs(k,:,1),sun_vecs(j,:,1))'; i = i + 1;
+               s_all_cross(:,i) = cross(sun_vecs(k,:,1),sun_vecs(j,:,1))';
+               s_map(1:3,j,k) = s_all_cross(:,i);
+               s_map(1:3,k,j) = -s_all_cross(:,i);
+               i = i + 1;
                svec = svec+cross(sun_vecs(k,:,1),sun_vecs(j,:,1));
             end
         end
@@ -229,13 +234,48 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         i = 1;
         for k = 1:(size(check_stop,1)-1)
             for j=(k+1):size(check_stop,1)
-               e_all_cross(:,i) = cross(sun_vecs(k,:,2),sun_vecs(j,:,2))'; i = i + 1;
+               e_all_cross(:,i) = cross(sun_vecs(k,:,2),sun_vecs(j,:,2))';
+               e_map(1:3,j,k) = e_all_cross(:,i);
+               e_map(1:3,k,j) = -e_all_cross(:,i);
+               i = i + 1;
                evec = evec+cross(sun_vecs(k,:,2),sun_vecs(j,:,2)); 
             end
         end
 
-        [azs,zes,rs] = cart2sph(svec(1),svec(2),svec(3));
-        [aze,zee,re] = cart2sph(evec(1),evec(2),evec(3));
+        % TODO: If only one is empty, should do the non-empty one
+        if isempty (s_map) || isempty (e_map)
+          fprintf ('Skipping %d. lengths %d %d n', l, length (s_map), length (e_map));
+          continue;
+        end
+
+        % Find time at which sun is perpendicular to panel
+
+        % Normalize so that all cross products have the same "sense"
+        % Find principal component
+                % Trailing ~ needed to force eigenvecs instead of eigenvals
+        [pc, ~] = eig (s_all_cross * s_all_cross');
+        s_all_cross_new = bsxfun (@times, sign (pc(:,3)' * s_all_cross), s_all_cross);
+        svec = sum (s_all_cross_new, 2);
+        if svec(3) < 0
+          svec = -svec;
+        end
+        s_map_new = s_map;
+        s_map_new(:,:) = bsxfun (@times, sign (pc(:,3)' * s_map(:,:)), s_map(:,:));
+
+        [pc, ~] = eig (e_all_cross * e_all_cross');
+        e_all_cross_new = bsxfun (@times, sign (pc(:,3)' * e_all_cross), e_all_cross);
+        evec = sum (e_all_cross_new, 2);
+        if evec(3) < 0
+          evec = -evec;
+        end
+        e_map_new = e_map;
+        e_map_new(:,:) = bsxfun (@times, sign (pc(:,3)' * e_map(:,:)), e_map(:,:));
+
+        [azs,zes,rs] = cart2sph(svec(1), svec(2),svec(3));
+        [aze,zee,re] = cart2sph(evec(1),-evec(2),evec(3));
+
+        zes = pi/2 - zes;
+        zee = pi/2 - zee;
 
         s_var(l) = var(s_all_cross(1,:)) + var(s_all_cross(2,:)) + var(s_all_cross(3,:));
         e_var(l) = var(e_all_cross(1,:)) + var(e_all_cross(2,:)) + var(e_all_cross(3,:));
