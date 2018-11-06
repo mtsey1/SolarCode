@@ -190,6 +190,14 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
             end
         end
 
+        % Wrap to avoid jump in sun azimuth near noon.
+        sz = size (start_stop);
+        start_stop = reshape (start_stop, numel (start_stop(:, :, 1)), size (start_stop, 3));
+        idx = start_stop(:, 2) > 180;
+        start_stop(idx, 2) = start_stop(idx, 2) - 360;
+        start_stop = reshape (start_stop, sz);
+
+
         %%find the start and stop azimuths and zeniths in radians, and exclude
         %%the times where it starts or stops generating at sunrise or sunset
         %%respectively
@@ -280,9 +288,9 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         s_var(l) = var(s_all_cross(1,:)) + var(s_all_cross(2,:)) + var(s_all_cross(3,:));
         e_var(l) = var(e_all_cross(1,:)) + var(e_all_cross(2,:)) + var(e_all_cross(3,:));
 
-        crossFit(l,1) = azs.*(180/pi);  crossFit(l,3)=aze.*(180/pi);
-        crossFit(l,2) = -zes.*(180/pi); crossFit(l,4) = -zee.*(180/pi);     
-        
+        crossFit(l,1) = azs.*(180/pi); crossFit(l,3) = aze.*(180/pi);
+        crossFit(l,2) = zes.*(180/pi); crossFit(l,4) = zee.*(180/pi);
+
     end
     
     %fprintf('\nthe start az is %i and ze is %i\n',azs,zes);
