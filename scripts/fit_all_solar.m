@@ -19,7 +19,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     vampires = find_vampires (reshape (permute (data(:,:,dark), [2, 1, 3]), size (data,1)*meta.Days, length(dark)));
     vampires = reshape (vampires, [meta.Days, size(data,1)])';
   end
-  
+
   %solar_capacity = max (max_solar(:,s.solar_start:s.solar_end),[],2) + vampires;
 
   smr = [meta.January, meta.February, meta.November, meta.December];
@@ -122,7 +122,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     %%%% get a time index
     if ~exist('sun_time')
     sun_time = generate_sun_array(2014,48);
-    end    
+    end
     for l = 1:size(data_no_vamp,1)
         dnv = -squeeze(data_no_vamp(l,:,:));
         scontour = zeros(size(dnv));
@@ -150,11 +150,11 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
 %             ncontour(k,cont_idx(k,2))=1;
 %             end
         end
-        
+
         %%%%min filter, window size: 5
         temp_cont_idx=zeros(size(cont_idx));
         for k = 3:(size(cont_idx,1)-2)
-            
+
             temp_cont1 = cont_idx((k-2):(k+2),1);
             temp_cont1 = temp_cont1(temp_cont1>0,1);
             temp_cont2 = cont_idx((k-2):(k+2),2);
@@ -172,8 +172,8 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
                 ncontour(k,temp_cont_idx(k,2))=1;
             end
         end
-        
-        
+
+
         scontour(:,25:48)=0;
         ncontour(:,1:24)=0;
         cont = scontour+ncontour;
@@ -183,10 +183,10 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         start_stop = zeros(size(dnv,1),2,3);
         for k = 1:size(dnv,1)
             if size(sun_time(k,logical(scontour(k,:)),:),2)~=0
-            start_stop(k,1,:) = sun_time(k,logical(scontour(k,:)),:); 
+                start_stop(k,1,:) = sun_time(k,logical(scontour(k,:)),:);
             end
             if size(sun_time(k,logical(ncontour(k,:)),:),2)~=0
-            start_stop(k,2,:) = sun_time(k,logical(ncontour(k,:)),:); 
+                start_stop(k,2,:) = sun_time(k,logical(ncontour(k,:)),:);
             end
         end
 
@@ -201,19 +201,19 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         %%find the start and stop azimuths and zeniths in radians, and exclude
         %%the times where it starts or stops generating at sunrise or sunset
         %%respectively
-        
+
         check_start=start_stop(start_stop(:,1,3)<90,1,2:3)*pi/180;
         check_stop=start_stop(start_stop(:,2,3)<90,2,2:3)*pi/180;
-        
+
         check_start = check_start(check_start(:,1) ~= 0, :, :);
         check_stop  = check_stop (check_stop (:,1) ~= 0, :, :);
 
         % Average out noise
         check_start = moving_ave (check_start, 51);
         check_stop  = moving_ave (check_stop,  51);
-        
 
-        %%a place to store all of our cartesian sun vectors. 
+
+        %%a place to store all of our cartesian sun vectors.
         %index: 365days,[x,y,z],start/stop
         sun_vecs = zeros(size(dnv,1),3,2);
 
@@ -252,13 +252,13 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
                e_map(1:3,j,k) = e_all_cross(:,i);
                e_map(1:3,k,j) = -e_all_cross(:,i);
                i = i + 1;
-               evec = evec+cross(sun_vecs(k,:,2),sun_vecs(j,:,2)); 
+               evec = evec+cross(sun_vecs(k,:,2),sun_vecs(j,:,2));
             end
         end
 
         % TODO: If only one is empty, should do the non-empty one
         if isempty (s_map) || isempty (e_map)
-          fprintf ('Skipping %d. lengths %d %d n', l, length (s_map), length (e_map));
+          fprintf ('Skipping %d. lengths %d %d\n', l, length (s_map), length (e_map));
           continue;
         end
 
@@ -298,11 +298,11 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         crossFit(l,2) = zes.*(180/pi); crossFit(l,4) = zee.*(180/pi);
 
     end
-    
+
     %fprintf('\nthe start az is %i and ze is %i\n',azs,zes);
     %fprintf('\nthe stop az is %i and ze is %i\n',aze,zee);
-    
-    
+
+
     %%%%%%%%
   i = start;
   while(i <= size(data,1))
@@ -316,7 +316,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     if size(disconnected,1)~=365
         disconnected = disconnected';
     end
-        
+
     if ~not_all(i)
       wpos = bpos;
 
@@ -420,7 +420,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
 %}
     if size(size(data))==[1,2]
        data_no_vamp=reshape(data_no_vamp,[1,365,48]);
-       data=reshape(data,[1,365,48]);        
+       data=reshape(data,[1,365,48]);
     end
     [seen_summer, seen_winter] = compute_seen(data(i,:,:), data_no_vamp(i,:,:), r1, r2, meta);
 
@@ -477,9 +477,9 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
 %    solar_range = bsxfun (@plus, (s.solar_start:s.solar_end)', size (data, 3) * (0:len/max_len-1));
     solar_range = s.solar_start:s.solar_end;
     solar_range = solar_range(:);
-    
-    
-  
+
+
+
     autofit = true;
     if isempty (cold_days)
       i = i + 1;
@@ -493,13 +493,13 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
 
     if ~autofit
       if ~exist ('solar_by_pc', 'var')
-        s = find_solar_by_pc (s, meta);  
+        s = find_solar_by_pc (s, meta);
         %load solar_by_pc;
       end
       irradiation = ones (size (squeeze (data(i,:,:))'));
       if meta.pclist==0
       irradiation(s.dark_end:s.dark_start,:) = 2 * ...
-      squeeze (s.solar_by_pc (1,:,:))'; 
+      squeeze (s.solar_by_pc (1,:,:))';
       else
       irradiation(s.dark_end:s.dark_start,:) = 2 * ...
       squeeze (s.solar_by_pc (meta.pclist == meta.postcode(i),:,:))';
@@ -620,21 +620,21 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
 
   vampires = [vampires(:,1), diff(vampires,1,2)];
   crossFit = [crossFit,az',ze'];
-  
+
   for i = 1: size(crossFit,1)
-  
+
 %     Xrot_start = [1,0,0;0,cosd(crossFit(i,1)),sind(crossFit(i,1));0,-sind(crossFit(i,1)),cosd(crossFit(i,1))];
 %     Yrot_start = [cosd(crossFit(i,2)),0,-sind(crossFit(i,2));0,1,0;sind(crossFit(i,2)),0,cosd(crossFit(i,2))];
 %     start_vec = Xrot_start*(Yrot_start*[0;1;0]);
-% 
+%
 %     Xrot_end = [1,0,0;0,cosd(crossFit(i,3)),sind(crossFit(i,3));0,-sind(crossFit(i,3)),cosd(crossFit(i,3))];
-%     Yrot_end = [cosd(crossFit(i,4)),0,-sind(crossFit(i,4));0,1,0;sind(crossFit(i,4)),0,cosd(crossFit(i,4))]; 
+%     Yrot_end = [cosd(crossFit(i,4)),0,-sind(crossFit(i,4));0,1,0;sind(crossFit(i,4)),0,cosd(crossFit(i,4))];
 %     end_vec = Xrot_end*(Yrot_end*[0;1;0]);
-% 
+%
 %     Xrot_fit = [1,0,0;0,cosd(crossFit(i,5)),sind(crossFit(i,5));0,-sind(crossFit(i,5)),cosd(crossFit(i,5))];
-%     Yrot_fit = [cosd(crossFit(i,6)),0,-sind(crossFit(i,6));0,1,0;sind(crossFit(i,6)),0,cosd(crossFit(i,6))];  
+%     Yrot_fit = [cosd(crossFit(i,6)),0,-sind(crossFit(i,6));0,1,0;sind(crossFit(i,6)),0,cosd(crossFit(i,6))];
 %     fit_vec = Xrot_fit*(Yrot_fit*[0;1;0]);
-    
+
     [X,Y,Z]= sph2cart(crossFit(i,1)*pi/180,(90-crossFit(i,2))*pi/180,1);
     start_vec(:,i) = [X;Y;Z];
     [X,Y,Z]= sph2cart(crossFit(i,3)*pi/180,(90-crossFit(i,4))*pi/180,1);
@@ -645,8 +645,8 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     Ang_diff(i,1) = acosd(dot(start_vec(:,i),fit_vec(:,i)));
     Ang_diff(i,2) = acosd(dot(end_vec(:,i),fit_vec(:,i)));
     Ang_diff(i,3) = acosd(dot(end_vec(:,i),start_vec(:,i)));
-    
+
   end
-  
+
   1+1;
 end
