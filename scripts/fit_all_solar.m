@@ -112,7 +112,6 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
   end
 
   jump_to_unsaved = false;
-  i = start;
   s_var = zeros(1, size (data_no_vamp, 1));
   e_var = s_var;
 
@@ -120,9 +119,10 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     %%what i'm doing%%
 %timeAr=['00:30','1:00','1:30','2:00','2:30','3:00','3:30','4:00','4:30','5:00','5:30','6:00','6:30','7:00','7:30','8:00','8:30','9:00','9:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00','22:30','23:00','23:30','00:00'];
     %%%% get a time index
-    if ~exist('sun_time')
-    sun_time = generate_sun_array(2014,48);
+    if ~exist('sun_time', 'var')
+        sun_time = generate_sun_array(2014,48);
     end
+    crossFit = zeros (size(data_no_vamp, 1), 4);
     for l = 1:size(data_no_vamp,1)
         dnv = -squeeze(data_no_vamp(l,:,:));
         scontour = zeros(size(dnv));
@@ -231,6 +231,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         svec = [0,0,0]; evec = [0,0,0];
         s_all_cross = zeros(3, floor (size(check_start,1)^2 / 2));
         e_all_cross = s_all_cross;
+        sz = size (check_start, 1);
         s_map = permute (zeros (size(check_start,1)), [3 1 2]);
         e_map = s_map;
         %%cross product every combination of vectors
@@ -259,6 +260,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         % TODO: If only one is empty, should do the non-empty one
         if isempty (s_map) || isempty (e_map)
           fprintf ('Skipping %d. lengths %d %d\n', l, length (s_map), length (e_map));
+          crossFit(l,:) = NaN;
           continue;
         end
 
@@ -285,8 +287,8 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         e_map_new = e_map;
         e_map_new(:,:) = bsxfun (@times, sign (pc(:,3)' * e_map(:,:)), e_map(:,:));
 
-        [azs,zes,rs] = cart2sph(svec(1), svec(2),svec(3));
-        [aze,zee,re] = cart2sph(evec(1),-evec(2),evec(3));
+        [azs,zes,~] = cart2sph(svec(1), svec(2),svec(3));
+        [aze,zee,~] = cart2sph(evec(1),-evec(2),evec(3));
 
         zes = pi/2 - zes;
         zee = pi/2 - zee;
@@ -620,6 +622,11 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
 
   vampires = [vampires(:,1), diff(vampires,1,2)];
   crossFit = [crossFit,az',ze'];
+
+  start_vec = zeros (3, size (crossFit, 1));
+  end_vec = start_vec;
+  fit_vec = start_vec;
+  Ang_diff = zeros (size (crossFit, 1), 3);
 
   for i = 1: size(crossFit,1)
 
