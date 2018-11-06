@@ -215,7 +215,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         end
 
         svec = [0,0,0]; evec = [0,0,0];
-        s_all_cross = zeros(3, size(check_start,1)^2 / 2);
+        s_all_cross = zeros(3, floor (size(check_start,1)^2 / 2));
         e_all_cross = s_all_cross;
         %%cross product every combination of vectors
         i = 1;
@@ -250,7 +250,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     
     
     %%%%%%%%
-  
+  i = start;
   while(i <= size(data,1))
 %   for i = start:size (data,1)
     r1 = smr;
