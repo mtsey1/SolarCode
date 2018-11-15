@@ -6,6 +6,27 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
   figure10 = figure(10); plot(1); figure10 = get (figure10, 'CurrentAxes');
   figure11 = figure(11); plot(1); figure11 = get (figure11, 'CurrentAxes');
 
+  use_ideal_solar = 1;
+  if use_ideal_solar
+    synthetic_az = [-40 0 40];
+    synthetic_ze = [20 20 20];
+    sz = size (data);
+    sz(1) = length (synthetic_az);
+    capFactor = zeros (sz);
+    for k = 1:length(synthetic_az)
+      i = 1:meta.Days;
+      for j = 1:meta.SamPerDay%0:(s.dark_start-s.dark_end)
+        % Estimate generation at this time, assuming no cloud
+        p1 = cosd(synthetic_ze(k));
+        p2 = sind(synthetic_ze(k)).*cosd(s.full_pp(i,j) - synthetic_az(k));
+        capFactor(k,i,j) ...
+          = max (0,   bsxfun (@times, s.full_s1(i,j), p1) ...
+                    + bsxfun (@times, s.full_s2(i,j), p2))';
+      end
+    end
+    data = -capFactor;
+  end
+
   % (don't use squeeze, as it fails if  size (data,1)==1)
   %max_solar = reshape (-2*min (data,[],2), [size (data,1), meta.SamPerDay]);
   if size(size(data)) == [1,2]
@@ -114,6 +135,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
   jump_to_unsaved = false;
   s_var = zeros(1, size (data_no_vamp, 1));
   e_var = s_var;
+
 
     %%%%%%%%
     %%what i'm doing%%
@@ -655,5 +677,9 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
 
   end
 
-  1+1;
+  if use_ideal_solar
+    Found = crossFit(:,:)
+    groundTruth = [synthetic_az; synthetic_ze]'
+  end
+
 end

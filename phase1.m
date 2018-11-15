@@ -109,6 +109,26 @@ if nargin == 2                  % Set up data structures
                 state.SunPos(i,j-state.solar_start+state.dark_end+1) = SunPos;
             end
         end
+        state.full_s1 = -1*ones(meta.Days, meta.SamPerDay);
+        state.full_s2 = zeros  (meta.Days, meta.SamPerDay);
+        state.full_pp = zeros  (meta.Days, meta.SamPerDay);
+        for j = 0:meta.SamPerDay-1
+            time.hour = (j) * 24/meta.SamPerDay;
+
+            % Record data to estimate generation at this time, assuming no cloud
+            SunPos = sun_position_vector(time, location, true);
+                 % don't allow generation after sunset
+            spz = [SunPos.zenith];
+            spa = [SunPos.azimuth];
+            idx = (spz < 90);
+            state.full_s1(idx,j+1) = cosd(spz(idx));
+            state.full_s2(idx,j+1) = sind(spz(idx));
+            state.full_pp(idx,j+1) = spz(idx);
+
+            tmp_ze(i,j+1) = [SunPos.zenith];
+            tmp_az(i,j+1) = [SunPos.azimuth];
+        end
+    1+1;
     %end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
