@@ -15,7 +15,7 @@ function ave = moving_ave (data, length, dim)
     end
   end
   if length > size (data, dim)
-    length = size (data, dim);
+    length = 2 * ceil (size (data, dim) / 2) - 1;  % greatest odd <= len
   end
   
   cs = cumsum (data, dim);
