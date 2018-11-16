@@ -486,8 +486,8 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     % should check hemisphere
     use_hot_days  = sort (use(floor (end/2)+1:end));
     use_cold_days = sort (use(1:floor (end/2)));
-    hot_days  = floor (use_hot_days( max_len:max_len:end) / 5);
-    cold_days = floor (use_cold_days(max_len:max_len:end) / 5);
+    hot_days  = floor (use_hot_days( max_len:max_len:end) / max_len);
+    cold_days = floor (use_cold_days(max_len:max_len:end) / max_len);
     % New "seen".  with or without vampires, summer or winter, half hour      clear seen
     seen = zeros (2, len / max_len, size (data_no_vamp, 3));
     tmp = squeeze (data_no_vamp(i, f(1:len), :));
