@@ -109,6 +109,12 @@ if nargin == 2                  % Set up data structures
                 state.SunPos(i,j-state.solar_start+state.dark_end+1) = SunPos;
             end
         end
+
+        % Don't allow any generation when the sun is below the horizon
+        idx = (state.s1 < 0);
+        state.s1(idx) = -1;
+        state.s2(idx) = 0;
+
         state.full_s1 = -1*ones(meta.Days, meta.SamPerDay);
         state.full_s2 = zeros  (meta.Days, meta.SamPerDay);
         state.full_pp = zeros  (meta.Days, meta.SamPerDay);
@@ -128,6 +134,10 @@ if nargin == 2                  % Set up data structures
             tmp_ze(i,j+1) = [SunPos.zenith];
             tmp_az(i,j+1) = [SunPos.azimuth];
         end
+        % Don't allow any generation when the sun is below the horizon
+        idx = (state.full_s1 < 0);
+        state.full_s1(idx) = -1;
+        state.full_s2(idx) = 0;
     1+1;
     %end
 

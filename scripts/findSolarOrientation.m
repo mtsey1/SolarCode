@@ -311,6 +311,11 @@ function ac = angle_coefficient (sun, az, ze)
     s1 = cosd(zenith);
     s2 = sind(zenith).*cosd(azimuth - az);
 
+    % Don't allow any generation when the sun is below the horizon
+    idx = (s1 < 0);
+    s1(idx) = -1;
+    s2(idx) = 0;
+
     p1 = cosd(ze);
     p2 = sind(ze);
 
