@@ -123,7 +123,7 @@ if nargin == 2                  % Set up data structures
             idx = (spz < 90);
             state.full_s1(idx,j+1) = cosd(spz(idx));
             state.full_s2(idx,j+1) = sind(spz(idx));
-            state.full_pp(idx,j+1) = spz(idx);
+            state.full_pp(idx,j+1) = spa(idx);
 
             tmp_ze(i,j+1) = [SunPos.zenith];
             tmp_az(i,j+1) = [SunPos.azimuth];
