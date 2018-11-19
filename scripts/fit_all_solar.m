@@ -14,15 +14,20 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     sz(1) = length (synthetic_az);
     capFactor = zeros (sz);
     for k = 1:length(synthetic_az)
-      i = 1:meta.Days;
-      for j = 1:meta.SamPerDay%0:(s.dark_start-s.dark_end)
-        % Estimate generation at this time, assuming no cloud
-        p1 = cosd(synthetic_ze(k));
-        p2 = sind(synthetic_ze(k)).*cosd(s.full_pp(i,j) - synthetic_az(k));
-        capFactor(k,i,j) ...
-          = max (0,   bsxfun (@times, s.full_s1(i,j), p1) ...
-                    + bsxfun (@times, s.full_s2(i,j), p2))';
-      end
+%      i = 1:meta.Days;
+%       for j = 1:meta.SamPerDay%0:(s.dark_start-s.dark_end)
+%         % Estimate generation at this time, assuming no cloud
+%         p1 = cosd(synthetic_ze(k));
+%         p2 = sind(synthetic_ze(k)).*cosd(s.full_pp(i,j) - synthetic_az(k));
+%         capFactor(k,i,j) ...
+%           = max (0,   bsxfun (@times, s.full_s1(i,j), p1) ...
+%                     + bsxfun (@times, s.full_s2(i,j), p2))';
+%       end
+      p1 = cosd(synthetic_ze(k));
+      p2 = sind(synthetic_ze(k));
+      capFactor(k,:,:) = max (0, bsxfun (@times, s.full_s1, p1) ...
+                             + bsxfun (@times, s.full_s2 .* cosd(s.full_pp - synthetic_az(k)), ...
+                                               p2));
     end
     data = -capFactor;
   end
