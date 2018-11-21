@@ -97,16 +97,16 @@ if nargin == 2                  % Set up data structures
     %for i = 1:meta.Days
     i = 1:meta.Days;
         time.day = i;           % Can handle "100th day of month 1" etc.
-        for j = 0:(state.dark_start-state.dark_end)
-            time.hour = (state.dark_end+j) * 24/meta.SamPerDay;
+        for j = state.dark_end+1:state.dark_start-1
+            time.hour = (j-1) * 24/meta.SamPerDay;
 
             % Record data to estimate generation at this time, assuming no cloud
             SunPos = sun_position_vector(time, location, true);
-            state.s1(i,j+1) = cosd([SunPos.zenith]);
-            state.s2(i,j+1) = sind([SunPos.zenith]);
-            state.pp(i,j+1) = [SunPos.azimuth];
-            if (j >= state.solar_start - state.dark_end) && (j + state.dark_end <= state.solar_end)
-                state.SunPos(i,j-state.solar_start+state.dark_end+1) = SunPos;
+            state.s1(i,j - state.dark_end) = cosd([SunPos.zenith]);
+            state.s2(i,j - state.dark_end) = sind([SunPos.zenith]);
+            state.pp(i,j - state.dark_end) = [SunPos.azimuth];
+            if (j >= state.solar_start) && (j <= state.solar_end)
+                state.SunPos(i,j - state.solar_start + 1) = SunPos;
             end
         end
 
@@ -118,8 +118,8 @@ if nargin == 2                  % Set up data structures
         state.full_s1 = -1*ones(meta.Days, meta.SamPerDay);
         state.full_s2 = zeros  (meta.Days, meta.SamPerDay);
         state.full_pp = zeros  (meta.Days, meta.SamPerDay);
-        for j = 0:meta.SamPerDay-1
-            time.hour = (j) * 24/meta.SamPerDay;
+        for j = 1:meta.SamPerDay
+            time.hour = (j-1) * 24/meta.SamPerDay;
 
             % Record data to estimate generation at this time, assuming no cloud
             SunPos = sun_position_vector(time, location, true);
@@ -127,12 +127,12 @@ if nargin == 2                  % Set up data structures
             spz = [SunPos.zenith];
             spa = [SunPos.azimuth];
             idx = (spz < 90);
-            state.full_s1(idx,j+1) = cosd(spz(idx));
-            state.full_s2(idx,j+1) = sind(spz(idx));
-            state.full_pp(idx,j+1) = spa(idx);
+            state.full_s1(idx,j) = cosd(spz(idx));
+            state.full_s2(idx,j) = sind(spz(idx));
+            state.full_pp(idx,j) = spa(idx);
 
-            tmp_ze(i,j+1) = [SunPos.zenith];
-            tmp_az(i,j+1) = [SunPos.azimuth];
+            tmp_ze(i,j) = [SunPos.zenith];
+            tmp_az(i,j) = [SunPos.azimuth];
         end
         % Don't allow any generation when the sun is below the horizon
         idx = (state.full_s1 < 0);

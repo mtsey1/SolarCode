@@ -515,7 +515,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
       continue;
     end
     my_data = squeeze (data(i,:,:));
-    my_data = my_data(:, s.dark_end:s.dark_start);
+    my_data = my_data(:, s.dark_end+1:s.dark_start-1);
 
     tic
     [cap(i), az(i), ze(i), ~, mismatch(i), funcs] = findSolarOrientation (seen, sp, meta.SamPerDay, solar_range, my_data, s, hot_days, cold_days);
@@ -632,7 +632,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
   seen = zeros (size (data,1), meta.Days, (s.dark_start - s.dark_end)+1);
   capFactor = seen;
   for i = 1:meta.Days
-    for j = 0:(s.dark_start-s.dark_end)
+    for j = 0:(s.dark_start-s.dark_end - 2)
       % Estimate generation at this time, assuming no cloud
       p1 = cosd(ze);
       p2 = sind(ze).*cosd(s.pp(i,j+1) - az);
