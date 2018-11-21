@@ -323,8 +323,8 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         s_var(l) = var(s_all_cross(1,:)) + var(s_all_cross(2,:)) + var(s_all_cross(3,:));
         e_var(l) = var(e_all_cross(1,:)) + var(e_all_cross(2,:)) + var(e_all_cross(3,:));
 
-        crossFit(l,1) = azs.*(180/pi); crossFit(l,3) = aze.*(180/pi);
-        crossFit(l,2) = zes.*(180/pi); crossFit(l,4) = zee.*(180/pi);
+        crossFit(l,1) = azs.*(180/pi); crossFit(l,3) = -aze.*(180/pi);
+        crossFit(l,2) = zes.*(180/pi); crossFit(l,4) =  zee.*(180/pi);
 
     end
 
