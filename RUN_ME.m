@@ -45,7 +45,7 @@ elseif 1>0
   if exist ('C:', 'dir')
     bulkDataPath = 'G:/My Drive/rsrch/power/UnitedEnergy/';
     if ~exist (bulkDataPath, 'dir')
-      bulkDataPath = 'C:/Users/seymo/Desktop/UnitedEnergy/';
+      bulkDataPath = 'C:/Users/Michael Hackwill/Desktop/Project/UnitedEnergy/';
     end
   else
     bulkDataPath = '~/UnitedEnergy/';
@@ -56,7 +56,7 @@ elseif 1>0
   meta.timestamp_uses_daylightsaving = true;
   meta.dataset_name = 'Melbourne';
 else
-  bulkDataPath = 'C:/Users/seymo/Desktop/UnitedEnergy/';
+  bulkDataPath = 'C:/Users/Michael Hackwill/Desktop/Project/UnitedEnergy/';
   metaDataPath = bulkDataPath;
   Year = 2014;
   meta.SamPerDay = 48;
@@ -93,8 +93,8 @@ DoCnI = 0;
 full_years_only = true;
 
 % Set to a non-zero value to process only  MaxUsers customers
-MaxUsers = 100;
-%MaxUsers = 300;
+%MaxUsers = 100;
+MaxUsers = 300;
 %MaxUsers = 1000;
 %MaxUsers = 88000;
 
@@ -104,7 +104,7 @@ endAt = 2;
 
 % Set to 0 to run from an alternate set of files, and output to "short_..."
 % Set to 1 to run from the main file.
-DoLong = 0;
+DoLong = 1;
 
 % Trust EnStandingData to tell us if customers are solar or HWS?
 % If true (non-zero), only ESD customers are processed.

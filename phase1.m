@@ -133,7 +133,7 @@ if nargin == 2                  % Set up data structures
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-elseif isempty(data)            % Conclude phase 1
+elseif (isempty(data))            % Conclude phase 1
     s.gridLoad = s.gridLoad ./ s.gridLoadCount;
     s.gridLoadAll = s.gridLoadAll ./ s.gridLoadCountAll;
     [~, mildDays] = sort (s.gridLoad);
@@ -425,7 +425,7 @@ else
 	state.capFactor(solar_user_range,:,:) = capFactor;
 	state.daily_min(solar_user_range,:) = daily_min;
                                                     % no sparse single type
-        state.vampires (solar_users+meta.UserOffset,:) = double(vampires);
+    state.vampires (solar_users+meta.UserOffset,:) = double(vampires);
     end
     % Estimate vampires for non-solar users
     if length(solar_users) < length(ind)

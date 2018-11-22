@@ -6,7 +6,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
   figure10 = figure(10); plot(1); figure10 = get (figure10, 'CurrentAxes');
   figure11 = figure(11); plot(1); figure11 = get (figure11, 'CurrentAxes');
 
-  use_ideal_solar = 1;
+  use_ideal_solar = 0;
   if use_ideal_solar
     synthetic_az = [-40 0 40 180];
     synthetic_ze = [50 50 50 30];
@@ -514,7 +514,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
 
 
 
-    autofit = true;
+    autofit = false;
     if isempty (cold_days)
       i = i + 1;
       continue;
