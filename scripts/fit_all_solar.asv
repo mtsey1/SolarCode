@@ -14,20 +14,15 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     sz(1) = length (synthetic_az);
     capFactor = zeros (sz);
     for k = 1:length(synthetic_az)
-%      i = 1:meta.Days;
-%       for j = 1:meta.SamPerDay%0:(s.dark_start-s.dark_end)
-%         % Estimate generation at this time, assuming no cloud
-%         p1 = cosd(synthetic_ze(k));
-%         p2 = sind(synthetic_ze(k)).*cosd(s.full_pp(i,j) - synthetic_az(k));
-%         capFactor(k,i,j) ...
-%           = max (0,   bsxfun (@times, s.full_s1(i,j), p1) ...
-%                     + bsxfun (@times, s.full_s2(i,j), p2))';
-%       end
-      p1 = cosd(synthetic_ze(k));
-      p2 = sind(synthetic_ze(k));
-      capFactor(k,:,:) = max (0, bsxfun (@times, s.full_s1, p1) ...
-                             + bsxfun (@times, s.full_s2 .* cosd(s.full_pp - synthetic_az(k)), ...
-                                               p2));
+      i = 1:meta.Days;
+      for j = 1:meta.SamPerDay%0:(s.dark_start-s.dark_end)
+        % Estimate generation at this time, assuming no cloud
+        p1 = cosd(synthetic_ze(k));
+        p2 = sind(synthetic_ze(k)).*cosd(s.full_pp(i,j) - synthetic_az(k));
+        capFactor(k,i,j) ...
+          = max (0,   bsxfun (@times, s.full_s1(i,j), p1) ...
+                    + bsxfun (@times, s.full_s2(i,j), p2))';
+      end
     end
     data = -capFactor;
   end
@@ -272,12 +267,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
                svec = svec+cross(sun_vecs(k,:,1),sun_vecs(j,:,1));
             end
         end
-        
-  figure(100)
-  hold on
-  for u = 1:size(sun_vecs,1)
-  quiver3(0,0,0,sun_vecs(u,1,1),sun_vecs(u,2,1),sun_vecs(u,3,1))
-  end
+
         i = 1;
         for k = 1:(size(check_stop,1)-1)
             for j=(k+1):size(check_stop,1)
@@ -288,12 +278,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
                evec = evec+cross(sun_vecs(k,:,2),sun_vecs(j,:,2));
             end
         end
-  figure(101)
-  hold on
-  for u = 1:size(sun_vecs,1)
-  quiver3(0,0,0,sun_vecs(u,1,2),sun_vecs(u,2,2),sun_vecs(u,3,2))
-  end
-  close 100 101
+
         % TODO: If only one is empty, should do the non-empty one
         if isempty (s_map) || isempty (e_map)
           fprintf ('Skipping %d. lengths %d %d\n', l, length (s_map), length (e_map));
@@ -333,8 +318,8 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
         s_var(l) = var(s_all_cross(1,:)) + var(s_all_cross(2,:)) + var(s_all_cross(3,:));
         e_var(l) = var(e_all_cross(1,:)) + var(e_all_cross(2,:)) + var(e_all_cross(3,:));
 
-        crossFit(l,1) = azs.*(180/pi); crossFit(l,3) = -aze.*(180/pi);
-        crossFit(l,2) = zes.*(180/pi); crossFit(l,4) =  zee.*(180/pi);
+        crossFit(l,1) = azs.*(180/pi); crossFit(l,3) = aze.*(180/pi);
+        crossFit(l,2) = zes.*(180/pi); crossFit(l,4) = zee.*(180/pi);
 
     end
 
@@ -501,8 +486,8 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     % should check hemisphere
     use_hot_days  = sort (use(floor (end/2)+1:end));
     use_cold_days = sort (use(1:floor (end/2)));
-    hot_days  = floor (use_hot_days( max_len:max_len:end) / max_len);
-    cold_days = floor (use_cold_days(max_len:max_len:end) / max_len);
+    hot_days  = floor (use_hot_days( max_len:max_len:end) / 5);
+    cold_days = floor (use_cold_days(max_len:max_len:end) / 5);
     % New "seen".  with or without vampires, summer or winter, half hour      clear seen
     seen = zeros (2, len / max_len, size (data_no_vamp, 3));
     tmp = squeeze (data_no_vamp(i, f(1:len), :));
@@ -525,7 +510,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
       continue;
     end
     my_data = squeeze (data(i,:,:));
-    my_data = my_data(:, s.dark_end+1:s.dark_start-1);
+    my_data = my_data(:, s.dark_end:s.dark_start);
 
     tic
     [cap(i), az(i), ze(i), ~, mismatch(i), funcs] = findSolarOrientation (seen, sp, meta.SamPerDay, solar_range, my_data, s, hot_days, cold_days);
@@ -642,7 +627,7 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
   seen = zeros (size (data,1), meta.Days, (s.dark_start - s.dark_end)+1);
   capFactor = seen;
   for i = 1:meta.Days
-    for j = 0:(s.dark_start-s.dark_end - 2)
+    for j = 0:(s.dark_start-s.dark_end)
       % Estimate generation at this time, assuming no cloud
       p1 = cosd(ze);
       p2 = sind(ze).*cosd(s.pp(i,j+1) - az);
@@ -691,8 +676,10 @@ function [cap, az, ze, seen, capFactor, daily_min, vampires, mismatch] = fit_all
     Ang_diff(i,3) = acosd(dot(end_vec(:,i),start_vec(:,i)));
 
   end
-  
-
+  hold on
+  for u = 1:i
+  quiver(0,0,0,start_vec(:,i))
+  end
   if use_ideal_solar
     Found = crossFit(:,:)
     groundTruth = [synthetic_az; synthetic_ze]'
