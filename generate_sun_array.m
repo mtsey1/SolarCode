@@ -12,12 +12,12 @@ time.UTC = 10;
 % location.altitude = 400;
 
 
-
 init = datenum(start_year,0,0,0,0,0);
 
-time_mat = zeros(365,resolution,3);
+days = 365 + (mod (start_year, 4) == 0);  % bug outside 1901:2099
+time_mat = zeros(days,resolution,3);
 
-for i=1:365
+for i=1:days
     for j=0:resolution-1
         time.year = start_year;
         time.month = 1;

@@ -23,6 +23,9 @@ time.min = 0;
 time.sec = 0;
 time.day = 21;
 
+
+
+
 if 0>0
   if exist ('C:', 'dir')
     bulkDataPath = 'C:/Users/Lachlan Andrew/rsrch/NILM/PecanSt/';
@@ -41,7 +44,7 @@ if 0>0
   location.latitude = +37;
   location.longitude = -87;
   location.altitude = 60;
-elseif 1>0
+elseif 0>0
   if exist ('C:', 'dir')
     bulkDataPath = 'G:/My Drive/rsrch/power/UnitedEnergy/';
     if ~exist (bulkDataPath, 'dir')
@@ -55,6 +58,26 @@ elseif 1>0
   meta.SamPerDay = 48;
   meta.timestamp_uses_daylightsaving = true;
   meta.dataset_name = 'Melbourne';
+elseif 1>0
+  if exist ('C:', 'dir')
+    bulkDataPath = 'G:/My Drive/rsrch/power/UnitedEnergy/';
+    if ~exist (bulkDataPath, 'dir')
+      bulkDataPath = 'C:/Users/Michael Hackwill/Desktop/Project/UnitedEnergy/Sydney/';
+    end
+  else
+    bulkDataPath = '~/UnitedEnergy/';
+  end
+  metaDataPath = bulkDataPath;
+  Year = 2012;
+  meta.SamPerDay = 48;
+  meta.timestamp_uses_daylightsaving = true;
+  meta.dataset_name = 'Sydney';
+  %Sydney
+hemisphere='south';
+location.latitude=-33.865143;
+location.longitude=151.209900;
+location.altitude=80;
+time.UTC=+10;
 else
   bulkDataPath = 'C:/Users/Michael Hackwill/Desktop/Project/UnitedEnergy/';
   metaDataPath = bulkDataPath;
@@ -94,9 +117,9 @@ full_years_only = true;
 
 % Set to a non-zero value to process only  MaxUsers customers
 %MaxUsers = 100;
-MaxUsers = 300;
+%MaxUsers = 300;
 %MaxUsers = 1000;
-%MaxUsers = 88000;
+MaxUsers = 88000;
 
 % Which phases to execute
 startAt = 1;
@@ -104,21 +127,23 @@ endAt = 2;
 
 % Set to 0 to run from an alternate set of files, and output to "short_..."
 % Set to 1 to run from the main file.
-DoLong = 1;
+DoLong = 0;
 
 % Trust EnStandingData to tell us if customers are solar or HWS?
 % If true (non-zero), only ESD customers are processed.
 TrustESD = 1;
+daysIn = @(Y)(365 + (mod(Y,4) == 0 & (mod(Y,100)~=0 | mod(Y,400) == 0)));
+meta.Days = daysIn(Year);
 
 if exist ('OCTAVE_VERSION', 'builtin')
   batchUsers = 1500;
 else
-  batchUsers = 3000;
+  batchUsers = 3500;
 end
 if MaxUsers ~= 0
   batchUsers = min (batchUsers, MaxUsers);
 end
-batchRows = 365 * batchUsers;		% number of lines to read at a time
+batchRows = meta.Days * batchUsers;		% number of lines to read at a time
 
 dbstop if error;
 %dbstop if naninf;        % currently crashes octave
@@ -128,9 +153,8 @@ meta.real_pools = [];	%real_pools;
 
 meta.HotDayThresh = 32;
 meta.ColdDayThresh = 15;
-daysIn = @(Y)(365 + (mod(Y,4) == 0 & (mod(Y,100)~=0 | mod(Y,400) == 0)));
-meta.Days = 365%daysIn(Year);
-DayOffset = 735234 + sum(daysIn(2014:Year));
+meta.Year = Year;
+DayOffset = 735234 - sum(daysIn(2000:2014)) + sum(daysIn(2000:Year)) - 2;
 meta.peakhours = (6*meta.SamPerDay/24-1):(23*meta.SamPerDay/24);
 meta.ph = length(meta.peakhours);
 
@@ -185,7 +209,9 @@ catch
 end
 
 fprintf('Loading temperatures\n');
-temperatures = load ([metaDataPath, sprintf('temperatures%d.txt',Year)]);
+
+%temperatures = load ([metaDataPath, sprintf('temperatures%d.txt',Year)]);
+temperatures = zeros(meta.Days, 1);
 meta.temperatures = temperatures;
 meta.max_temp = max (temperatures,[],2);
 min_temp      = min (temperatures,[],2);
@@ -537,6 +563,9 @@ for ph = startAt:endAt
                     meta.phase = ph;
                     fprintf('Starting phase %d: %d from NMI %s\n', ...
                             ph, size(data,1), NMIs{1});
+ if 1
+     data = -data;
+ end
                     state = phase(state, meta, data);
                     offset = offset + size(data,1);
 
