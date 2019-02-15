@@ -1,6 +1,8 @@
-function [errorvec, errorsize]=find_sunvec(vec,showplot)
+function [errorvec, errorsize]=find_sunvec(shading,vec,showplot)
 year = 2013;
 pos=find(vec);
+temp=length(pos);
+showplot=0;
 for q=1:6
 pos(end+1)=NaN;
 end
@@ -10,7 +12,10 @@ sunvec=generate_sun_array(year,48);
 [yy,xx]=ind2sub(size(vec),pos);
 errorvec=zeros(size(vec));
 i=1;
-fprintf('%d \n',length(pos))
+if showplot
+    fprintf('%d \n',length(pos))
+end
+count=0;
 while(~isnan(pos(i)))
     %another way may be to find the loccation with the minimum distance
     %away from it 
@@ -19,7 +24,7 @@ while(~isnan(pos(i)))
     [res, index]=mink(reshape(dist,[],1),7); 
     logicsunvec=zeros(365,31);
     pos2=index;
-    for k=1:5
+    for k=1:7
         logicsunvec(ind2sub(size(dist),index(k)))=1;
     end
     %{
@@ -27,9 +32,10 @@ while(~isnan(pos(i)))
     pos2=find(logicsunvec);
     %}
     sum=0;
+
     for j=1:length(pos2)
         [y,x]=ind2sub(size(vec'),pos2(j));
-        if vec(x,y)
+        if shading(x,y)
             %should only remove once it it has been gone over for many
             %locations
              pos(pos==pos2(j))=[];
@@ -40,10 +46,12 @@ while(~isnan(pos(i)))
     end
     if 2*sum>length(pos2)
         errorvec(yy(i),xx(i))=1;
-    end   
+    else
+        count=count+1;
+    end
     %}
     i=i+1;
-    if showplot
+    if 1==0
         figure(50);
         imagesc(vec)
         figure(51);
@@ -53,8 +61,11 @@ while(~isnan(pos(i)))
     end
     
 end
-fprintf('%d \n',length(pos))
-errorsize=length(find(errorvec))/length(pos);
-figure;
-imagesc((vec|errorvec)+errorvec);
+
+errorsize=count/temp;
+if 1==0
+    fprintf('%d \n',length(pos))
+    figure;
+    imagesc((vec|errorvec)+errorvec);
+end
 end
