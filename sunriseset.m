@@ -1,4 +1,4 @@
-function [solar,panel]=sunriseset(lat,long,UTCoff,normalAz,normalZe,plotout)
+function [solar,panel]=sunriseset(lat,long,UTCoff,normalAz,normalZe,plotout,offset)
 %takes in the latitude longtitude UT offset and the normalAZ(angle of solar
 %panel from facing the equator and normalZe(the angle of the panel above
 %the horizontal and whether to output a plot. 
@@ -15,8 +15,8 @@ solarCorr = longCorr + EoTCorr;
 delta = 23.45*sind(360*(days + 287)/365);    % Solar declination
 
 
-solar(1,:) = 12 - acosd(-tand(lat)*tand(delta))/15 - solarCorr/60;
-solar(2,:)  = 12 + acosd(-tand(lat)*tand(delta))/15 - solarCorr/60;
+solar(1,:) = 2*(12 - acosd(-tand(lat)*tand(delta))/15 - solarCorr/60);
+solar(2,:)  = 2*(12 + acosd(-tand(lat)*tand(delta))/15 - solarCorr/60);
 %%%%---Method 1------%%%%
 %may need to transform panel zenith by 90 deg
 %my need to try negative of the panel Az
@@ -30,23 +30,23 @@ k2=(a*b+sqrt(a^2-b.^2+1))/(a^2+1);
 ws1=acosd(k1);
 ws2=acosd(k2);
 if (normalAz<0)
-    panel(1,:)=(12-ws2/15-solarCorr/60);
-    panel(2,:)=(12+ws1/15-solarCorr/60); 
+    panel(1,:)=2*(12-ws2/15-solarCorr/60);
+    panel(2,:)=2*(12+ws1/15-solarCorr/60); 
 else
-    panel(1,:)=(12-ws1/15-solarCorr/60);
-    panel(2,:)=(12+ws2/15-solarCorr/60); 
+    panel(1,:)=2*(12-ws1/15-solarCorr/60);
+    panel(2,:)=2*(12+ws2/15-solarCorr/60); 
 end
 
 if plotout
-    plot(days, solar(1,:), days, solar(2,:), 'LineWidth', 2)
+    plot(days, solar(1,:)-offset, days, solar(2,:)-offset, 'LineWidth', 2)
     hold on
-    plot(days, panel(1,:), days, panel(2,:), 'LineWidth', 2)
-    axis([1 365 0 24])
+    plot(days, panel(1,:)-offset, days, panel(2,:)-offset, 'LineWidth', 2)
     title('Sunrise and Sunset')
     xlabel('Day of Year')
-    ylabel('Time of Day')
+    ylabel('Time')
     legend('Sunrise', 'Sunset','Panel Sunrise','Panel Sunset')
-    
+    yticks([0,5,10,15,20,25,30])
+    yticklabels({'5:00','7:30','10:00','12:30','15:00','17:30','20:00'})
 end
 
 %%%%------Method 2------%%%%

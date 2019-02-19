@@ -117,9 +117,9 @@ full_years_only = true;
 
 % Set to a non-zero value to process only  MaxUsers customers
 %MaxUsers = 100;
-%MaxUsers = 300;
+MaxUsers = 300;
 %MaxUsers = 1000;
-MaxUsers = 88000;
+%MaxUsers = 88000;
 
 % Which phases to execute
 startAt = 1;
