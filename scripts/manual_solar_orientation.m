@@ -1,4 +1,4 @@
-function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] = manual_solar_orientation (az, ze, cap, seen, sunPos, data, data_no_vamp, s, hot_days, cold_days, solar_start, solar_end, solar_range, meta, data_idx, orientation_data_cell, disconnected, irradiation, funcs)
+ function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] = manual_solar_orientation (az, ze, cap, seen, sunPos, data, data_no_vamp, s, hot_days, cold_days, solar_start, solar_end, solar_range, meta, data_idx, orientation_data_cell, disconnected, irradiation, funcs)
   orientation_data = orientation_data_cell.orientation_data;
   connected = find (~disconnected);
 
@@ -397,6 +397,8 @@ function [az, ze, cap, abort, orientation_data, jump_to_unsaved, jump_to_house] 
         set(clr_line_selection,'Enable','off');
         set(negative_con_chkbox,'Enable','off');
         imagesc (ha, data);
+        hold on;
+        plot(acos(-0.776071.*tan(0.0651111.*cos(0.0172142.*((1:365)+10))))*24/pi+24);
         xlabel('Day of Year');
         ylabel('Time of Day (Half-an-hour)');
         colorbar;

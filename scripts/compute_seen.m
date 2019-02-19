@@ -11,7 +11,7 @@ function [seen_summer, seen_winter] = compute_seen(data, data_no_vamp, r1, r2, m
     a = [d, nv];
     seen_summer = reshape(a, [size(a,2), 1, size(d,3)]);
     
-    % For visualising
+    %For visualising
 %     figure;
 %     plot(linspace(0,23,48),[squeeze(d)' squeeze(nv)]);
 %     xlabel('Time of day');
