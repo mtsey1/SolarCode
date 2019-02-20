@@ -204,8 +204,10 @@ try
       %keyboard
   end
 catch
-  meta.pclist = 0;
-  meta.postcode_neighbours = 1;
+  disp ('Could not load postcode_neighbouts.txt.');
+  disp ('A partial workaround is to type');
+  disp ('    meta.pclist = 0; meta.postcode_neighbours = 1;');
+  keyboard;
 end
 
 fprintf('Loading temperatures\n');
