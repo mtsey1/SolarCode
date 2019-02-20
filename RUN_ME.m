@@ -60,7 +60,7 @@ elseif 0>0
   meta.dataset_name = 'Melbourne';
 elseif 1>0
   if exist ('C:', 'dir')
-    bulkDataPath = 'G:/My Drive/rsrch/power/UnitedEnergy/';
+    bulkDataPath = 'C:/Users/Lachlan Andrew/rsrch/NILM/Sydney/';
     if ~exist (bulkDataPath, 'dir')
       bulkDataPath = 'C:/Users/Michael Hackwill/Desktop/Project/UnitedEnergy/Sydney/';
     end
