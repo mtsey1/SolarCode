@@ -1,14 +1,14 @@
-function [solar,panel]=sunriseset(lat,long,UTCoff,normalAz,normalZe,plotout,offset)
+function [solar,panel]=sunriseset(lat,long,UTCoff,normalAz,normalZe,plotout,offset,yearsDay)
 %takes in the latitude longtitude UT offset and the normalAZ(angle of solar
 %panel from facing the equator and normalZe(the angle of the panel above
 %the horizontal and whether to output a plot. 
 %the output is the sunrise and sunset times for both the sun and the solar
 %panel 
 
-solar=zeros(2,365);
+solar=zeros(2,yearsDay);
 longCorr = 4*(long - 15*UTCoff);                         % longitudinal correction
-days = 1:365;
-B = 360*(days - 81)/365;
+days = 1:yearsDay;
+B = 360*(days - 81)/yearsDay;
 EoTCorr = 9.87*sind(2*B) - 7.53*cosd(B) - 1.5*sind(B);  % Equation of Time correction
 solarCorr = longCorr + EoTCorr;
 

@@ -1,10 +1,10 @@
-function time_mat = generate_sun_array(start_year,resolution)
+function time_mat = generate_sun_array(start_year,resolution,meta)
     
 
 %%format inputs for sun_position script
-location.latitude = -37.8136;
-location.longitude = 144.9631;
-location.altitude = 0;
+location.latitude = meta.location.latitude;
+location.longitude = meta.location.longitude;
+location.altitude = meta.location.altitude;
 time.UTC = 10;
 % time.UTC = 0;
 % location.latitude = 47.50685;

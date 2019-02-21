@@ -1,5 +1,5 @@
-function [errorvec, errorsize]=find_sunvec(shading,vec,showplot)
-year = 2013;
+function [errorvec, errorsize]=find_sunvec(shading,vec,showplot,meta)
+year = meta.Year;
 pos=find(vec);
 temp=length(pos);
 showplot=0;
@@ -8,7 +8,7 @@ pos(end+1)=NaN;
 end
 thresh1=1.5;
 thresh2=0.5;
-sunvec=generate_sun_array(year,48);
+sunvec=generate_sun_array(year,48,meta);
 [yy,xx]=ind2sub(size(vec),pos);
 errorvec=zeros(size(vec));
 i=1;
