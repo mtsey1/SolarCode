@@ -58,7 +58,12 @@ shadowinglist=[20,146,179,208,233,238,239,240,243,259,266,277,284,292];
 
 %calculating array of sun vector positions at half hour incriments
 %throughout the year
-sunvec=generate_sun_array(meta.Year,48,meta);
+if meta.Year
+    year=meta.Year;
+else
+    year=2013;
+end
+sunvec=generate_sun_array(year,48,meta);
 
 %calculating number of times to run through 
 num=min([total,length(meta.solar_users)]);
@@ -344,11 +349,11 @@ function res=qualitychecks(shading,showplot,sun,panel,s,ampm,days,meta)
             end
         end
     end
-    [~,err]= vec(orig,shading,showplot,meta);
+    [~,err]= find_sunvec(orig,shading,showplot,meta);
     res(3)=err;
     else
         res(3)=0;
-end
+    end
     
     res(4)=(res(1)>0.8)&(res(2)>0.65)&(res(3)>0.7);
 end

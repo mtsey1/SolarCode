@@ -127,7 +127,7 @@ endAt = 2;
 
 % Set to 0 to run from an alternate set of files, and output to "short_..."
 % Set to 1 to run from the main file.
-DoLong = 0;
+DoLong = 1;
 
 % Trust EnStandingData to tell us if customers are solar or HWS?
 % If true (non-zero), only ESD customers are processed.
@@ -277,7 +277,7 @@ t = (1:meta.SamPerDay) * 24/meta.SamPerDay;
 % Load data in, if not already in memory
 
 if DoLong ~= 0
-    filename = {[bulkDataPath, 'data_only.csv'],...
+    filename = {[bulkDataPath, 'solar_only.csv'],...
                 [bulkDataPath, 'LabelledUnified.csv']};
     phfiles= {[bulkDataPath, 'phase1.mat'], ...
               [bulkDataPath, 'phase2.mat'], ...
