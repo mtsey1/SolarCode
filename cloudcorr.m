@@ -1,4 +1,4 @@
-function [correlation,res]=cloudcorr(s,data,meta) 
+function [correlation,res,egdes]=cloudcorr(s,data,meta) 
 %------------------------------------------------------------
 %cloudcorr takes in the gross power data for a household and the meta 
 %and state data for the household it then conducts a rolling correlation
@@ -74,6 +74,7 @@ end
 %predefining outputs size
 correlation=zeros(num,days,31);
 res=zeros(num,4,2);
+edges=zeros(num,days,31,2);
 fprintf('house number ');
 
 %begin loop for each house 
@@ -184,6 +185,8 @@ for i=1:num
     if sum(sum(afternoonshadedge))<200
         afternoonshadedge(:,:)=0;
     end
+    edges(i,:,:,1)=morningshadegde;
+    edges(i,:,:,2)=afternoonshadedge;
     origafter=imdilate(afternoonshadedge,[0,0,0;0,1,0;1,1,1]);
     origmorn=imdilate(morningshadedge,[1,1,1;0,1,0;0,0,0]);
     for h=1:5
