@@ -1,9 +1,10 @@
 function [errorvec, errorsize]=find_sunvec(shading,vec,showplot,meta)
+% this is crude and currently unused 
 year = meta.Year;
 pos=find(vec);
 temp=length(pos);
 showplot=0;
-for q=1:6
+for q=1:12
 pos(end+1)=NaN;
 end
 thresh1=1.5;

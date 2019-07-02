@@ -1,15 +1,17 @@
-function manipulate(res,correlation,data,meta,edges);
+function res=manipulate(res,correlation,data,meta,edges);
+
 year=meta.Year;
-
-
+lengthtot=100;
+plotfind=0;
+listin=0;
 %logistic regression
 
 %method to identify house from plot
 %(potentially scatter3 with particular view)
-if list 
+if listin 
     houses=listHouse;
 else
-    houses=1:length(res);
+    houses=1:lengthtot;
 end
 sunvec=generate_sun_array(year,48,meta);
 mornshaded=res(res(houses,9,1)==1);
@@ -32,22 +34,22 @@ plot(res(mornnonshaded,13,1),res(mornnonshaded,11,1),'b*'); hold on;
 plot(res(afternonshaded,13,2),res(afternonshaded,11,2),'b*');
 xlabel('edge strength')
 ylabel('deviation within region')
-
+a=[res(mornshaded,1,1),res(aftershaded,1,1),res(mornnonshaded,1,1),res(aftershaded,1,1)];
+if plotfind
+    [xx,yy,ind]=graphpoints;
+    houses=a(ind)
+end
+    
 for i=houses
     figure(100);
-    imagesc(data(i,:,:));
-    hold on 
-    sunriseset(meta.location.latitude,meta.location.longitude,10,s.solar_az(itt),(s.solar_ze(itt)),1,s.dark_end,days);        
+    imagesc(squeeze(data(i,:,:))');
     figure(101);
     imagesc(squeeze(correlation(i,:,:))')
-    hold on
-    sunriseset(meta.location.latitude,meta.location.longitude,10,s.solar_az(itt),(s.solar_ze(itt)),1,s.dark_end,days);
-    axis([1 days 1 31])
     figure(102);
-    imagesc(edges(i,:,:,1)|edges(i,:,:,2));
+    imagesc(squeeze(edges(i,:,:,1)|edges(i,:,:,2)));
     axis([1 days 1 31])        
-    mornX=zenith(edges(i,:,:,1)|edges(i,:,:,2));
-    mornY=azim(edges(i,:,:,1)|edges(i,:,:,2));
+    mornX=zenith(squeeze(edges(i,:,:,1)|edges(i,:,:,2)));
+    mornY=azim(squeeze(edges(i,:,:,1)|edges(i,:,:,2)));
     figure(104);
     plot(mornY,mornX,'*');
     hold on
@@ -64,9 +66,8 @@ for i=houses
     update=input('Update plots and logistic regression\n');
     if update
         close([1,2])
-        [res(:,[10,11,13],1),res(:,[10,11,13],2)]
-        logist=mnrfit(
-        
+        fitdat=[res(1:lengthtot,[10,11,13],1),res(1:lengthtot,[10,11,13],2)];
+        [B,dev,stats]=mnrfit(fitdat,[res(1:lengthtot,9,1),res(1:lengthtot,9,2)]);
         mornshaded=res(res(houses,9,1)==1);
         aftershaded=res(res(houses,9,2)==1);
         mornnonshaded=res(res(houses,9,1)==0);

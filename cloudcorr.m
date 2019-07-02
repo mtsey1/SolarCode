@@ -1,4 +1,4 @@
-function [correlation,res,egdes]=cloudcorr(s,data,meta) 
+function [correlation,res,edges,meta]=cloudcorr(s,data,meta) 
 %------------------------------------------------------------
 %cloudcorr takes in the gross power data for a household and the meta 
 %and state data for the household it then conducts a rolling correlation
@@ -16,12 +16,12 @@ function [correlation,res,egdes]=cloudcorr(s,data,meta)
 n=60; %length of correlation
 width=3; % width of correlation
 days=meta.Days; %number of days in the year
-total=300; %Max number of household analysed  
-showplot=1; % logical value as to whether to show plots and figures generated 
+total=8000; %Max number of household analysed  
+showplot=0; % logical value as to whether to show plots and figures generated 
 shadowonly=0; %logical to use subset of data specified by vector shadowinglist
 corrmanip=1; %logical to manipulate correlation plot around sunrise/set
 noisered=1; %logical to reduce the amplitude of usage noise
-vischeck=1; %logical value allowing to input the 
+vischeck=0; %logical value allowing to input the 
 %B: old logistic regrestion values
 B=[10.8481630139160;-16.2828877554926;-1.06561285029183;5.08033613741109];
 correlationtrig=-0.35; %threshold 
@@ -58,10 +58,11 @@ shadowinglist=[20,146,179,208,233,238,239,240,243,259,266,277,284,292];
 
 %calculating array of sun vector positions at half hour incriments
 %throughout the year
-if meta.Year
+if isfield(meta,'Year')
     year=meta.Year;
 else
     year=2013;
+    meta.Year=2013;
 end
 sunvec=generate_sun_array(year,48,meta);
 
@@ -84,6 +85,9 @@ for i=1:num
         itt=shadowinglist(i);
     else
         itt=i;
+    end
+    if mod(i,100)==99
+        clc;
     end
     cap=s.solar_cap(itt);
     res(i,1,:)=[itt,itt];
@@ -185,8 +189,8 @@ for i=1:num
     if sum(sum(afternoonshadedge))<200
         afternoonshadedge(:,:)=0;
     end
-    edges(i,:,:,1)=morningshadegde;
-    edges(i,:,:,2)=afternoonshadedge;
+    edges(i,:,:,1)=morningshadedge';
+    edges(i,:,:,2)=afternoonshadedge';
     origafter=imdilate(afternoonshadedge,[0,0,0;0,1,0;1,1,1]);
     origmorn=imdilate(morningshadedge,[1,1,1;0,1,0;0,0,0]);
     for h=1:5
