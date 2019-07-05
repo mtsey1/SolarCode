@@ -26,7 +26,7 @@ vischeck=0; %logical value allowing to input the
 B=[10.8481630139160;-16.2828877554926;-1.06561285029183;5.08033613741109];
 correlationtrig=-0.35; %threshold 
 %shadowinglist: a list of specific houses that are needed to be checked 
-shadowinglist=[20,146,179,208,233,238,239,240,243,259,266,277,284,292];
+shadowinglist=[31,146,179,208,233,238,239,240,243,259,266,277,284,292];
 %OUTPUTS----------------------------------------------------------------
 %Correlation: array of correlation post procesing between the power data
 %and the cloud cover data within the the 10th to 40th half hour segments of
@@ -279,7 +279,7 @@ function correlation=findcorrelation(i,itt,n,width,s,datai,meta,correlation,corr
             correlation(i,k+1,j+shift)=R;
         end
     end
-    correlation=circshift(correlation,ceil(n/2),2);
+    correlation(i,:,:)=circshift(correlation(i,:,:),ceil(n/2),2);
     if corrmanip
         for m=0:364
             for n=0:(31-width)

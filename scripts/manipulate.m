@@ -1,8 +1,12 @@
-function res=manipulate(res,correlation,data,meta,edges);
+function res=manipulate(res,corr,data,meta,edges);
 
 year=meta.Year;
-lengthtot=100;
+lengthtot=10;
 plotfind=0;
+listin=0;
+days=365;
+vischeck=0;
+listHouse=[500,31,80,97,99,110,146,176];
 listin=0;
 %logistic regression
 
@@ -16,40 +20,40 @@ end
 sunvec=generate_sun_array(year,48,meta);
 mornshaded=res(res(houses,9,1)==1);
 aftershaded=res(res(houses,9,2)==1);
-mornnonshaded=res(res(houses,9,1)==0);
-afternonshaded=res(res(houses,9,2)==0);
-figure(1); plot(res(mornshaded,10,1),res(mornshaded,11,1),'ro'); hold on;
-plot(res(aftershaded,10,2),res(aftershaded,11,2),'ro'); hold on;
-plot(res(mornnonshaded,10,1),res(mornnonshaded,11,1),'b*'); hold on;
-plot(res(afternonshaded,10,2),res(afternonshaded,11,2),'b*');
+mornnonshaded=res(res(houses,9,1)~=1);
+afternonshaded=res(res(houses,9,2)~=1);
+figure(1); plot(res(mornshaded,10,1),abs(res(mornshaded,11,1)),'ro'); hold on;
+plot(res(aftershaded,10,2),abs(res(aftershaded,11,2)),'ro'); hold on;
+plot(res(mornnonshaded,10,1),abs(res(mornnonshaded,11,1)),'b*'); hold on;
+plot(res(afternonshaded,10,2),abs(res(afternonshaded,11,2)),'b*');
 xlabel('edge angle comparison')
 ylabel('deviation within region')
 
 zenith=sunvec(:,11:41,3)';
 azim=mod(sunvec(:,11:41,2)'+180,360);
 
-figure(2); plot(res(mornshaded,13,1),res(mornshaded,11,1),'ro'); hold on;
-plot(res(aftershaded,13,2),res(aftershaded,11,2),'ro'); hold on;
-plot(res(mornnonshaded,13,1),res(mornnonshaded,11,1),'b*'); hold on;
-plot(res(afternonshaded,13,2),res(afternonshaded,11,2),'b*');
+figure(2); plot(res(mornshaded,13,1),abs(res(mornshaded,11,1)),'ro'); hold on;
+plot(res(aftershaded,13,2),abs(res(aftershaded,11,2)),'ro'); hold on;
+plot(res(mornnonshaded,13,1),abs(res(mornnonshaded,11,1)),'b*'); hold on;
+plot(res(afternonshaded,13,2),abs(res(afternonshaded,11,2)),'b*');
 xlabel('edge strength')
 ylabel('deviation within region')
-a=[res(mornshaded,1,1),res(aftershaded,1,1),res(mornnonshaded,1,1),res(aftershaded,1,1)];
+%a=[res(mornshaded,1,1),res(aftershaded,1,1),res(mornnonshaded,1,1),res(aftershaded,1,1)];
 if plotfind
     [xx,yy,ind]=graphpoints;
-    houses=a(ind)
+    houses=a(ind);
 end
     
 for i=houses
     figure(100);
-    imagesc(squeeze(data(i,:,:))');
+    imagesc(squeeze(data(i,:,10:41))');
     figure(101);
-    imagesc(squeeze(correlation(i,:,:))')
+    imagesc(squeeze(corr(i,:,:))')
     figure(102);
-    imagesc(squeeze(edges(i,:,:,1)|edges(i,:,:,2)));
+    imagesc(squeeze(edges(i,:,:,1)|edges(i,:,:,2))');
     axis([1 days 1 31])        
-    mornX=zenith(squeeze(edges(i,:,:,1)|edges(i,:,:,2)));
-    mornY=azim(squeeze(edges(i,:,:,1)|edges(i,:,:,2)));
+    mornX=zenith(squeeze(edges(i,:,:,1)|edges(i,:,:,2))');
+    mornY=azim(squeeze(edges(i,:,:,1)|edges(i,:,:,2))');
     figure(104);
     plot(mornY,mornX,'*');
     hold on
@@ -87,7 +91,10 @@ for i=houses
         ylabel('deviation within region')
     end
     fprintf(repmat('\b',1,72));
+    close([100,101,104,102])
+    pause
 end
 end
     
+
    
