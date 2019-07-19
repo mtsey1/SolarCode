@@ -23,7 +23,7 @@ time.min = 0;
 time.sec = 0;
 time.day = 21;
 
-
+postcode_neighbours = 'postcode_neighbours.txt';
 
 
 if 0>0
@@ -53,6 +53,7 @@ elseif 1>0
   else
     bulkDataPath = '~/UnitedEnergy/';
   end
+  postcode_neighbours = 'postcode_neighbours.txt';
   metaDataPath = './';
   Year = 2013;
   meta.SamPerDay = 48;
@@ -68,6 +69,7 @@ elseif 0>0
     bulkDataPath = '~/UnitedEnergy/';
   end
   metaDataPath = bulkDataPath;
+  postcode_neighbours = 'postcode_neighbours_sydney';
   Year = 2012;
   meta.SamPerDay = 48;
   meta.timestamp_uses_daylightsaving = true;
@@ -190,7 +192,7 @@ end
 
 % postcode groups
 try
-  load ([metaDataPath, 'postcode_neighbours.txt']);
+  load ([metaDataPath, postcode_neighbours]);
   meta.postcode_neighbours = postcode_neighbours;
   %pclist = EnStandingData(:,6);
   %pclist(isnan(pclist)) = -1;
