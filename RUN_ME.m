@@ -44,7 +44,7 @@ if 0>0
   location.latitude = +37;
   location.longitude = -87;
   location.altitude = 60;
-elseif 0>0
+elseif 1>0
   if exist ('C:', 'dir')
     bulkDataPath = 'G:/My Drive/rsrch/power/UnitedEnergy/';
     if ~exist (bulkDataPath, 'dir')
@@ -58,7 +58,7 @@ elseif 0>0
   meta.SamPerDay = 48;
   meta.timestamp_uses_daylightsaving = true;
   meta.dataset_name = 'Melbourne';
-elseif 1>0
+elseif 0>0
   if exist ('C:', 'dir')
     bulkDataPath = 'C:/Users/Lachlan Andrew/rsrch/NILM/Sydney/';
     if ~exist (bulkDataPath, 'dir')
@@ -113,11 +113,11 @@ meta.do_heating = false;
 DoCnI = 0;
 
 % True if we only process users for which smart meter was present on day 1
-full_years_only = true;
+full_years_only = false;
 
 % Set to a non-zero value to process only  MaxUsers customers
-%MaxUsers = 100;
-MaxUsers = 300;
+MaxUsers = 100;
+%MaxUsers = 300;
 %MaxUsers = 1000;
 %MaxUsers = 88000;
 
@@ -154,7 +154,7 @@ meta.real_pools = [];	%real_pools;
 meta.HotDayThresh = 32;
 meta.ColdDayThresh = 15;
 meta.Year = Year;
-DayOffset = 735234 - sum(daysIn(2000:2014)) + sum(daysIn(2000:Year)) - 2;
+DayOffset = 735234 - sum(daysIn(2000:2013)) + sum(daysIn(2000:Year)) ;
 meta.peakhours = (6*meta.SamPerDay/24-1):(23*meta.SamPerDay/24);
 meta.ph = length(meta.peakhours);
 
@@ -277,7 +277,7 @@ t = (1:meta.SamPerDay) * 24/meta.SamPerDay;
 % Load data in, if not already in memory
 
 if DoLong ~= 0
-    filename = {[bulkDataPath, 'solar_only.csv'],...
+    filename = {[bulkDataPath, 'data_only.csv'],...
                 [bulkDataPath, 'LabelledUnified.csv']};
     phfiles= {[bulkDataPath, 'phase1.mat'], ...
               [bulkDataPath, 'phase2.mat'], ...
