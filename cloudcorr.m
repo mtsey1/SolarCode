@@ -17,16 +17,18 @@ n=60; %length of correlation
 width=3; % width of correlation
 days=meta.Days; %number of days in the year
 total=8000; %Max number of household analysed  
-showplot=0; % logical value as to whether to show plots and figures generated 
-shadowonly=0; %logical to use subset of data specified by vector shadowinglist
+showplot=1; % logical value as to whether to show plots and figures generated 
+shadowonly=1; %logical to use subset of data specified by vector shadowinglist
 corrmanip=1; %logical to manipulate correlation plot around sunrise/set
 noisered=1; %logical to reduce the amplitude of usage noise
-vischeck=0; %logical value allowing to input the 
+vischeck=1; %logical value allowing to input the
+res=1000;
 %B: old logistic regrestion values
 B=[10.8481630139160;-16.2828877554926;-1.06561285029183;5.08033613741109];
 correlationtrig=-0.35; %threshold 
 %shadowinglist: a list of specific houses that are needed to be checked 
-shadowinglist=[31,146,179,208,233,238,239,240,243,259,266,277,284,292];
+%shadowinglist=[13,14,15,19,24,30,146,179,208,233,238,239,240,243,259,266,277,284,292];
+shadowinglist=[5,21,37,53,69,85,101];
 %OUTPUTS----------------------------------------------------------------
 %Correlation: array of correlation post procesing between the power data
 %and the cloud cover data within the the 10th to 40th half hour segments of
@@ -65,6 +67,7 @@ else
     meta.Year=2013;
 end
 sunvec=generate_sun_array(year,48,meta);
+sunarray=generate_sun_array(year,res,meta);
 
 %calculating number of times to run through 
 num=min([total,length(meta.solar_users)]);
@@ -97,7 +100,7 @@ for i=1:num
             for m=1:48
                 temp=data(s.solar_users(itt),l,m);
                 if (2*temp)>1
-                    datai(l,m)=nthroot(2*temp,4)/2;
+                    datai(l,m)=nthroot(temp*4,4)/4;
                 else
                     datai(l,m)=temp;
                 end
@@ -191,6 +194,8 @@ for i=1:num
     end
     edges(i,:,:,1)=morningshadedge';
     edges(i,:,:,2)=afternoonshadedge';
+    edges(i,:,:,1)=circshift(squeeze(edges(i,:,:,1)),-1,2);
+    edges(i,:,:,2)=circshift(squeeze(edges(i,:,:,2)),1,2);
     origafter=imdilate(afternoonshadedge,[0,0,0;0,1,0;1,1,1]);
     origmorn=imdilate(morningshadedge,[1,1,1;0,1,0;0,0,0]);
     for h=1:5
@@ -215,13 +220,17 @@ for i=1:num
     afternoonshadprob=mnrval(B,squeeze(res(i,[10,12,13],2)));
     res(i,9,1)=morningshadprob(2);
     res(i,9,2)=afternoonshadprob(2);
+    [simed,fitvals]=simedge(edges,meta,i,sunvec,sunarray,showplot);
     if showplot
         %plotting figures 
+        mornedg=squeeze(edges(i,:,:,1));
+        afteredg=squeeze(edges(i,:,:,2));
         figure(100);
         imagesc(datai(:,:)');
         hold on 
         sunriseset(meta.location.latitude,meta.location.longitude,10,s.solar_az(itt),(s.solar_ze(itt)),1,s.dark_end,days);        
         figure(101);
+        correlation(i,squeeze(correlation(i,:,:)>0))=0;
         imagesc(squeeze(correlation(i,:,:))')
         hold on
         sunriseset(meta.location.latitude,meta.location.longitude,10,s.solar_az(itt),(s.solar_ze(itt)),1,s.dark_end,days);
@@ -249,6 +258,18 @@ for i=1:num
         imagesc(morningshadedge);
         figure(106);
         imagesc(afternoonshadedge);
+        row=simed(i,1,:);
+        col=simed(i,2,:);
+        %figure(107);
+        %imagesc(squeeze(data(i,:,10:40))'); hold on;
+        %plot(row(col<=14),col(col<=14),row(col>14),col(col>14));
+        %figure(108);
+        %imagesc(squeeze(correlation(i,:,:))'); hold on;
+        %plot(row(col<=14),col(col<=14),row(col>14),col(col>14));
+        %figure(109);
+        %imagesc((mornedg|afteredg)');hold on;
+        %plot(row(col<=14),col(col<=14),row(col>14),col(col>14));
+        %axis([1 days 1 31])
         if vischeck
             res(i,9,1)=input('Morning shading True False\n');
             res(i,9,2)=input('Afternoon shading True False\n');
@@ -365,6 +386,155 @@ function res=qualitychecks(shading,showplot,sun,panel,s,ampm,days,meta)
     res(4)=(res(1)>0.8)&(res(2)>0.65)&(res(3)>0.7);
 end
 
+function [simed,fitvals]=simedge(edges,meta,k,sunvec,sunarray,showplot)
+year=meta.Year;
+res=1000;
+days=365+~mod(year,4);
+mesh=zeros(days, res);
+%sunarray=generate_sun_array(year,res,meta);
+sunarray(:,:,2)=mod(sunarray(:,:,2)+180,360);
+%{
+leftheight=66;
+rightheight=66;
+leftedge=110;
+rightedge=190;
+centerheight=66;
+%}
+morn=0;
+after=0;
+sunvec2=sunvec;
+%sunvec2(:,:,2)=mod(sunvec2(:,:,2)+180,360);
+mornedg=squeeze(edges(k,:,:,1));
+afteredg=squeeze(edges(k,:,:,2));
+zenith2=squeeze(sunvec2(:,11:41,3)');
+azim2=squeeze(mod(sunvec2(:,11:41,2)'+180,360));
+mornzen=zenith2(logical(mornedg'));
+mornazim=azim2(logical(mornedg'));
+afterzen=zenith2(logical(afteredg'));
+afterazim=azim2(logical(afteredg'));
+if length(find(mornedg))>100
+mornfit=fit(mornazim,mornzen,'poly1','Robust','on'); 
+morn=1;
+end
+if length(find(afteredg))>100
+afterfit=fit(afterazim,afterzen,'poly1','Robust','on'); 
+after=1;
+end
+%afterfit=polyfit(afterazim,afterzen,1);
+
+%----
+%removingoutliers
+
+
+
+
+for i=1:days
+    for j=1:res
+        if sunarray(i,j,3)>90 
+            mesh(i,j)=1;
+        %elseif polyval(pmorn,sunarray(i,j,2))<=sunarray(i,j,3)&&pmorn(1)<0&&sunarray(i,j,2)>180
+        elseif morn
+            if mornfit(sunarray(i,j,2))<=sunarray(i,j,3)&&sunarray(i,j,2)>180
+            mesh(i,j)=1;
+            end
+        %elseif polyval(pafter,sunarray(i,j,2))<=sunarray(i,j,3)&&pafter(1)>0&&sunarray(i,j,2)<180
+        end
+        if after
+            if afterfit(sunarray(i,j,2))<=sunarray(i,j,3)&&sunarray(i,j,2)<180
+            mesh(i,j)=1;
+            end
+        %if sunarray(i,j,3)>90 
+            %mesh(i,j)=1;
+        %elseif sunarray(i,j,2)<=leftedge && sunarray(i,j,3)>leftheight
+            %mesh(i,j)=1;
+        %elseif sunarray(i,j,2)>=rightedge && sunarray(i,j,3)>rightheight
+            %mesh(i,j)=1;
+        %elseif (sunarray(i,j,2)<rightedge && sunarray(i,j,2)>leftedge) && sunarray(i,j,3)>centerheight 
+            %mesh(i,j)=1;
+        end 
+    end
+end
+
+
+
+
+edge=diff(mesh');
+
+
+
+%look to seperate morning and afternoon edge
+[col,row]=find(edge);
+col=col/1000*48-9;
+simed(k,:,:)=[row; col];
+if morn
+    fitvals(k,:,1)=coeffvalues(mornfit);
+else
+    fitvals(k,:,1)=[0,0];
+end
+if after
+    fitvals(k,:,2)=coeffvalues(afterfit);
+else
+    fitvals(k,:,2)=[0,0];
+end
+%meshmorn=zeros(365,31);
+%meshafter=zeros(365,31);
+%{
+for p=1:days
+    for l=10:40
+        %elseif polyval(pmorn,sunarray(i,j,2))<=sunarray(i,j,3)&&pmorn(1)<0&&sunarray(i,j,2)>180
+        if morn
+            if mornfit(sunvec2(p,l,2))<=sunvec2(p,l,3)&&sunvec2(p,l,2)>180
+            meshmorn(p,l-9)=1;
+            end
+        %elseif polyval(pafter,sunarray(i,j,2))<=sunarray(i,j,3)&&pafter(1)>0&&sunarray(i,j,2)<180
+        end
+        if after
+            if afterfit(sunvec2(p,l,2))<=sunvec2(p,l,3)&&sunvec2(p,l,2)<180
+            meshafter(p,l-9)=1;
+            end
+        end
+    end
+end
+%}
+
+
+
+%x=60:300;
+%Ymorn=polyval(pmorn,x);
+%Yafter=polyval(pafter,x);
+%X=[60, leftedge, leftedge, rightedge, rightedge,300];
+%Y=[leftheight,leftheight,centerheight,centerheight,rightheight,rightheight];
+
+if showplot
+zenith=sunarray(:,150:800,3)';
+azim=sunarray(:,150:800,2)';
+simed(k,:,:)=[row; col];
+mornX=zenith2((mornedg|afteredg)');
+mornY=azim2((mornedg|afteredg)');
+figure(110);
+plot(mornY,mornX,'*');
+hold on
+plot(azim(1:end,170),zenith(1:end,170));
+hold on
+plot(azim(1:end,350),zenith(1:end,350));
+hold on
+if morn
+plot(mornfit);
+hold on
+end
+if after
+plot(afterfit);
+end
+axis([60 300 0 100])
+set(gca, 'YDir','reverse');
+figure
+imagesc(mesh');
+%current problem is when only one sided 
+% problem with ouliers
+set(gca, 'YDir','reverse')
+end
+
+end
 
     
     
