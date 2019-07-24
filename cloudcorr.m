@@ -1,4 +1,4 @@
-function [correlation,res,edges,meta]=cloudcorr(s,data,meta) 
+function [correlation,res,edges,meta,fitvals,simed]=cloudcorr(s,data,meta) 
 %------------------------------------------------------------
 %cloudcorr takes in the gross power data for a household and the meta 
 %and state data for the household it then conducts a rolling correlation
@@ -18,7 +18,7 @@ width=3; % width of correlation
 days=meta.Days; %number of days in the year
 total=8000; %Max number of household analysed  
 showplot=1; % logical value as to whether to show plots and figures generated 
-shadowonly=1; %logical to use subset of data specified by vector shadowinglist
+shadowonly=0; %logical to use subset of data specified by vector shadowinglist
 corrmanip=1; %logical to manipulate correlation plot around sunrise/set
 noisered=1; %logical to reduce the amplitude of usage noise
 vischeck=1; %logical value allowing to input the
@@ -191,11 +191,18 @@ for i=1:num
     end
     if sum(sum(afternoonshadedge))<200
         afternoonshadedge(:,:)=0;
-    end
+    end    
     edges(i,:,:,1)=morningshadedge';
     edges(i,:,:,2)=afternoonshadedge';
-    edges(i,:,:,1)=circshift(squeeze(edges(i,:,:,1)),-1,2);
-    edges(i,:,:,2)=circshift(squeeze(edges(i,:,:,2)),1,2);
+    edges(i,:,:,1)=circshift(squeeze(edges(i,:,:,1)),-2,2);
+    edges(i,:,:,2)=circshift(squeeze(edges(i,:,:,2)),2,2);
+    gen=datai<0;
+    edges(i,:,:,1)=(squeeze(edges(i,:,:,1))&gen);
+    edges(i,:,:,2)=(squeeze(edges(i,:,:,2))&gen);
+    %could potentially remove any tiny points from
+    
+    
+    %below can be replaced with post fit line data check
     origafter=imdilate(afternoonshadedge,[0,0,0;0,1,0;1,1,1]);
     origmorn=imdilate(morningshadedge,[1,1,1;0,1,0;0,0,0]);
     for h=1:5

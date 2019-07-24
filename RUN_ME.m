@@ -115,12 +115,12 @@ meta.do_heating = false;
 DoCnI = 0;
 
 % True if we only process users for which smart meter was present on day 1
-full_years_only = true;
+full_years_only = false;
 
 % Set to a non-zero value to process only  MaxUsers customers
 %MaxUsers = 100;
-MaxUsers = 300;
-%MaxUsers = 1000;
+%MaxUsers = 300;
+MaxUsers = 1000;
 %MaxUsers = 88000;
 
 % Which phases to execute
@@ -156,7 +156,7 @@ meta.real_pools = [];	%real_pools;
 meta.HotDayThresh = 32;
 meta.ColdDayThresh = 15;
 meta.Year = Year;
-DayOffset = 735234 - sum(daysIn(2000:2014)) + sum(daysIn(2000:Year)) - 2;
+DayOffset = 735234 - sum(daysIn(2000:2014)) + sum(daysIn(2000:Year))-2;
 meta.peakhours = (6*meta.SamPerDay/24-1):(23*meta.SamPerDay/24);
 meta.ph = length(meta.peakhours);
 
