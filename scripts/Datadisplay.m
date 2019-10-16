@@ -1,11 +1,19 @@
 %display function
-house=
+house=38;
+close all;
+s=state;
 %data plot 
-[sun,panel]=sunriseset(meta.location.latitude,meta.location.longitude,10,s.solar_az(house),s.solar_ze(house),0,s.dark_end,meta.Days);   
+year=meta.Year;
+daystot=365+~mod(year,4);
+[sun,panel]=sunriseset(meta.location.latitude,meta.location.longitude,10,s.solar_az(house),s.solar_ze(house),0,s.dark_end,meta.Days);  
+sunvec=generate_sun_array(year,48,meta);
+zenith2=squeeze(sunvec(:,11:41,3)');
+azim2=squeeze(mod(sunvec(:,11:41,2)'+180,360));
 row=simed(house,:,1);
 col=simed(house,:,2);
-mornedg=circshift(squeeze(edges(k,:,:,1)),-1,2);
-afteredg=circshift(squeeze(edges(k,:,:,2)),1,2);
+mornedg=squeeze(edges(house,:,:,1));
+afteredg=squeeze(edges(house,:,:,2));
+days=1:daystot;
 figure(100);
     plot(days, panel(1,:)-10, days, panel(2,:)-10, 'LineWidth', 2)
     title('Sunrise and Sunset')
@@ -15,20 +23,20 @@ imagesc(squeeze(data(house,:,10:40))'); hold on;
 %seperate top and bottom curve        
 plot(row(col<=12),col(col<=12),row(col>17),col(col>17));
 figure(101);
-imagesc(squeeze(correlate(k,:,:))'); hold on;
+imagesc(squeeze(correlate(house,:,:))'); hold on;
 plot(row(col<=12),col(col<=12),row(col>17),col(col>17));
 figure(102);
 imagesc((mornedg|afteredg)');hold on;
 plot(row(col<=12),col(col<=12),row(col>17),col(col>17));
-axis([1 days 1 31])
+%axis([1 days 1 31])
 mornX=zenith2((mornedg|afteredg)');
 mornY=azim2((mornedg|afteredg)');
 figure(104);
 plot(mornY,mornX,'*');
 hold on
-plot(azim(1:end,170),zenith(1:end,170));
+plot(azim2(1:end,170),zenith2(1:end,170));
 hold on
-plot(azim(1:end,350),zenith(1:end,350));
+plot(azim2(1:end,350),zenith2(1:end,350));
 hold on
 xmorn=180:300;
 xafter=60:180;
